@@ -206,12 +206,12 @@ export default function ContactSection() {
                       disabled={!canSubmit}
                       className="col-span-1 md:col-span-2 w-full font-semibold"
                     >
-                      {isSubmitting ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="mr-2 h-4 w-4" />
-                      )}
                       {isSubmitting ? "Sending..." : "Submit Inquiry"}
+                      {isSubmitting ? (
+                        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="ml-2 h-4 w-4" />
+                      )}
                     </Button>
                   )}
                 </form.Subscribe>
