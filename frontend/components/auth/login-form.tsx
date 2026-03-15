@@ -16,7 +16,9 @@ import {
 export function LoginForm() {
   const form = useForm({
     defaultValues: { email: "", password: "" },
-    validatorAdapter: standardSchemaValidator(),
+    validators: {
+      onSubmit: loginSchema,
+    },
     onSubmit: async ({ value }) => {
       try {
         const response = await fetch("/api/proxy/login", {
