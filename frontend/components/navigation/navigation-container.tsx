@@ -196,7 +196,7 @@ const NavigationContainer = () => {
                 <HeartPulse className="size-5 text-primary" /> MedCare
               </SheetTitle>
             </SheetHeader>
-            <div className="flex flex-col gap-6">
+            <div className="px-6 flex flex-col gap-6">
               <nav className="flex flex-col gap-2">
                 <Link
                   href="/doctors"
