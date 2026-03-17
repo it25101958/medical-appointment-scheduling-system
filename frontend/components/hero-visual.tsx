@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 const INITIAL_IMAGES = [
-  { id: "img-1", src: "/d1.png" },
-  { id: "img-2", src: "/d3.png" },
-  { id: "img-3", src: "/d2.png" },
+  { id: "img-1", src: "/h1.png" },
+  { id: "img-2", src: "/h2.png" },
+  { id: "img-3", src: "/h3.png" },
 ];
 
 export default function HeroVisual() {
@@ -26,7 +26,7 @@ export default function HeroVisual() {
   }, []);
 
   return (
-    <div className="grid h-full w-full items-center md:gap-5 grid-cols-[1fr_2fr_1fr] relative">
+    <div className="grid h-full items-center xs:gap-4 md:gap-5 grid-cols-[1fr_2fr_1fr] relative">
       {items.map((img, i) => {
         const isCenter = i === 1;
 
@@ -39,7 +39,9 @@ export default function HeroVisual() {
             }}
             className={cn(
               "relative overflow-hidden  border border-border/50",
-              isCenter ? "h-[75%] z-20" : "h-[50%] z-10",
+              isCenter
+                ? "xs:h-[60%] sm:h-[70%] md:h-[75%] z-20"
+                : "xs:h-[40%] sm:h-[45%] md:h-[50%] z-10",
               "rounded-[24px] md:rounded-[40px]",
             )}
           >
