@@ -1,6 +1,6 @@
 # Medical Appointment System
 
-A full-stack **Medical Appointment System** built with **Next.js** to streamline hospital and clinic operations. This project is designed to manage users, patients, doctors, appointments, prescriptions, laboratory services, room scheduling, billing, payments, and feedback in one centralized platform. It aims to improve efficiency, reduce manual work, and provide a better experience for both patients and medical staff.
+A full-stack **Medical Appointment System** built with **Next.js, Springboot** to streamline hospital and clinic operations. This project is designed to manage users, patients, doctors, appointments, prescriptions, laboratory services, room scheduling, billing, payments, and feedback in one centralized platform. It aims to improve efficiency, reduce manual work, and provide a better experience for both patients and medical staff.
 
 ## Project Introduction
 
