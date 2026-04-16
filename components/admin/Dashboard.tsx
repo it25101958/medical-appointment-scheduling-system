@@ -19,10 +19,34 @@ const fadeIn = {
   visible: { opacity: 1 },
 };
 
+interface BentoProps {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  title: string;
+  action?: (() => void) | null;
+  buttonText: string;
+}
+
+const Bento: React.FC<BentoProps> = ({
+  icon: Icon,
+  title,
+  action,
+  buttonText,
+}) => {
+  const handleClick = action ? action : undefined;
+  return (
+    <div className="bento">
+      <Icon className="text-gray-500 h-6 w-6" />
+      <h3 className="text-lg font-semibold mt-2">{title}</h3>
+      <Button variant="outline" className="bentoText" onClick={handleClick}>
+        {buttonText}
+      </Button>
+    </div>
+  );
+};
+
 export default function Portal() {
   const router = useRouter();
 
-  // Entry point actions
   const handleManageUsers = () => {
     router.push("/admin/manage-users");
   };
@@ -38,6 +62,39 @@ export default function Portal() {
   const handleManageLaboratory = () => {
     router.push("/admin/laboratory");
   };
+
+  const bentoItems = [
+    {
+      icon: FileText,
+      title: "Billings",
+      action: handleManageBilling,
+      buttonText: "Manage Billing",
+    },
+    {
+      icon: ClipboardList,
+      title: "Laboratory",
+      action: handleManageLaboratory,
+      buttonText: "Manage Laboratory",
+    },
+    {
+      icon: FilePlus,
+      title: "Prescriptions",
+      action: null,
+      buttonText: "Manage Prescriptions",
+    },
+    {
+      icon: Users,
+      title: "Patients",
+      action: null,
+      buttonText: "View Patients",
+    },
+    {
+      icon: Bed,
+      title: "Rooms",
+      action: null,
+      buttonText: "Manage Rooms",
+    },
+  ];
 
   return (
     <section className="col-span-12 grid grid-cols-1 lg:grid-cols-12 lg:pt-20  lg:pb-20 items-center py-3">
@@ -90,50 +147,15 @@ export default function Portal() {
           variants={fadeIn}
           transition={{ duration: 1.5 }}
         >
-          <div className="bento">
-            <FileText className="text-gray-500 h-6 w-6" />
-            <h3 className="text-lg font-semibold mt-2">Billings</h3>
-            <Button
-              variant="outline"
-              className="bentoText"
-              onClick={handleManageBilling}
-            >
-              Manage Billing
-            </Button>
-          </div>
-          <div className="bento">
-            <ClipboardList className="text-gray-500 h-6 w-6" />
-            <h3 className="text-lg font-semibold mt-2">Laboratory</h3>
-            <Button
-              variant="outline"
-              className="bentoText"
-              onClick={handleManageLaboratory}
-            >
-              Manage Laboratory
-            </Button>
-          </div>
-          <div className="bento">
-            <FilePlus className="text-gray-500 h-6 w-6" />
-            <h3 className="text-lg font-semibold mt-2">Prescriptions</h3>
-            <Button variant="outline" className="bentoText">
-              Manage Prescriptions
-            </Button>
-          </div>
-
-          <div className="bento">
-            <Users className="text-gray-500 h-6 w-6" />
-            <h3 className="text-lg font-semibold mt-2">Patients</h3>
-            <Button variant="outline" className="bentoText">
-              View Patients
-            </Button>
-          </div>
-          <div className="bento">
-            <Bed className="text-gray-500 h-6 w-6" />
-            <h3 className="text-lg font-semibold mt-2">Rooms</h3>
-            <Button variant="outline" className="bentoText">
-              Manage Rooms
-            </Button>
-          </div>
+          {bentoItems.map((item, index) => (
+            <Bento
+              key={index}
+              icon={item.icon}
+              title={item.title}
+              action={item.action}
+              buttonText={item.buttonText}
+            />
+          ))}
         </motion.div>
       </div>
     </section>
