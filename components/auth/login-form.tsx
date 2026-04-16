@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { loginSchema } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
