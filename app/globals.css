@@ -145,4 +145,12 @@
   .form-label {
     @apply text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2;
   }
+
+  .bentoText {
+    @apply lg:mt-4 xs:text-xs lg:text-xs;
+  }
+
+  .bento {
+    @apply p-4 bg-card rounded-lg flex flex-col items-center border border-border;
+  }
 }
