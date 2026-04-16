@@ -147,7 +147,7 @@
   }
 
   .bentoText {
-    @apply lg:mt-4 xs:text-xs lg:text-xs;
+    @apply xs:mt-2 xs:text-xs;
   }
 
   .bento {
