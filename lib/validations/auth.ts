@@ -5,7 +5,7 @@ export const loginSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters."),
 });
 
-const commonUserSchema = z.object({
+export const commonUserSchema = z.object({
   email: z
     .string()
     .email("Please enter a valid email address.")
@@ -29,20 +29,15 @@ const commonUserSchema = z.object({
   NIC: z.string().nonempty("National Identity Card is required."),
   date_of_birth: z.string().nonempty("Date of birth is required."),
   gender: z
-    .enum(["male", "female", "other"])
-    .refine((val) => ["male", "female", "other"].includes(val), {
+    .enum(["MALE", "FEMALE", "OTHER"])
+    .refine((val) => ["MALE", "FEMALE", "OTHER"].includes(val), {
       message: "Gender must be male, female, or other.",
     }),
   address: z.string().nonempty("Address is required."),
   is_active: z.boolean().default(true),
 });
 
-const doctorSchema = z.object({
-  user_id: z
-    .number()
-    .int()
-    .positive()
-    .nonnegative("User ID must be a valid number."),
+export const doctorSchema = z.object({
   specialization: z
     .string()
     .min(3, "Specialization must be at least 3 characters.")
@@ -66,7 +61,7 @@ const doctorSchema = z.object({
     .min(0, "Consultation fee must be a positive number."),
 });
 
-const adminSchema = z.object({
+export const adminSchema = z.object({
   user_id: z
     .number()
     .int()
@@ -80,7 +75,7 @@ const adminSchema = z.object({
     }),
 });
 
-const staffSchema = z.object({
+export const staffSchema = z.object({
   user_id: z
     .number()
     .int()
@@ -97,7 +92,7 @@ const staffSchema = z.object({
   specialization: z.string().optional(),
 });
 
-const roleTypeSchema = z
+export const roleTypeSchema = z
   .enum(["patient", "doctor", "admin"])
   .refine((val) => ["patient", "doctor", "admin"].includes(val), {
     message:
