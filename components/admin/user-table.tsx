@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { UserDetailsDialog } from "./UserDetailsDialog";
 
 export interface User {
   userId: number;
@@ -25,6 +26,7 @@ interface UserTableProps {
   users: User[];
   onToggleActive: (userId: number, active: boolean) => void;
   onEditRole?: (user: User) => void;
+  onViewUserDetails?: (userId: number) => void;
 }
 
 const SYSTEM_ADMIN_ID = 1;
@@ -33,6 +35,7 @@ export function UserTable({
   users,
   onToggleActive,
   onEditRole,
+  onViewUserDetails,
 }: UserTableProps) {
   return (
     <ScrollArea className="bg-card rounded-lg border border-border overflow-x-auto">
@@ -80,7 +83,10 @@ export function UserTable({
                   </TableCell>
 
                   <TableCell className="px-4 py-2">
-                    <span className="text-sm font-medium text-foreground">
+                    <span
+                      className="text-sm font-medium text-foreground"
+                      onClick={() => onViewUserDetails(user.userId)}
+                    >
                       {user.firstName} {user.lastName}
                     </span>
                   </TableCell>
