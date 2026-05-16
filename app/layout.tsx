@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Open_Sans } from "next/font/google";
 import "./globals.css";
-import GridContainer from "@/components/grid-container";
+import GridContainer from "@/components/layout/grid-container";
 import { ThemeProvider } from "@/components/navigation/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 

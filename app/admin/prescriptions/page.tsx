@@ -1,6 +1,20 @@
 import { apiRequest } from "@/lib/api-client";
-import { PrescriptionList } from "@/components/admin/prescription-list";
-import { PaginationControls } from "@/components/admin/pagination-controls";
+import { PrescriptionList } from "@/features/admin/components/prescription-list";
+import { PaginationControls } from "@/features/admin/components/pagination-controls";
+
+interface PrescriptionListItem {
+  prescriptionId: number;
+  appointmentId: number;
+  patientName: string;
+  doctorName: string;
+  status: string;
+  createdAt: string;
+}
+
+interface PrescriptionsResponse {
+  content: PrescriptionListItem[];
+  totalPages: number;
+}
 
 export default async function AdminPrescriptionsPage({
   searchParams,
@@ -9,10 +23,13 @@ export default async function AdminPrescriptionsPage({
 }) {
   const params = await searchParams;
   const page = Number(params.page) || 0;
-  const data = await apiRequest(`/prescription?page=${page}&size=10`, {
-    method: "GET",
-    cache: "no-store",
-  });
+  const data = await apiRequest<PrescriptionsResponse>(
+    `/prescription?page=${page}&size=10`,
+    {
+      method: "GET",
+      cache: "no-store",
+    },
+  );
 
   return (
     <div className="space-y-6 col-span-1 col-span-13">

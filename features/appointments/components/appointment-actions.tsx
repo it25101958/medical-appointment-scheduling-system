@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { CalendarX, CheckCircle2, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,8 +30,8 @@ export function AppointmentActions({ appointment, onChanged }: Props) {
       });
       toast.success("Appointment confirmed");
       onChanged?.();
-    } catch (error: any) {
-      toast.error(error?.message || "Failed to update appointment");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to update appointment"));
     }
   }
 
@@ -41,8 +42,8 @@ export function AppointmentActions({ appointment, onChanged }: Props) {
       });
       toast.success("Appointment completed");
       onChanged?.();
-    } catch (error: any) {
-      toast.error(error?.message || "Failed to update appointment");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to update appointment"));
     }
   }
 
@@ -51,8 +52,8 @@ export function AppointmentActions({ appointment, onChanged }: Props) {
       await appointmentApi.cancel(appointment.appointmentId);
       toast.success("Appointment cancelled");
       onChanged?.();
-    } catch (error: any) {
-      toast.error(error?.message || "Failed to cancel appointment");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to cancel appointment"));
     }
   }
 

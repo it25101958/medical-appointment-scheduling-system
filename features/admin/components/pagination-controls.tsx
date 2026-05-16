@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -13,19 +12,19 @@ import {
 interface Props {
   currentPage: number;
   totalPages: number;
-  pageSize: number;
+  pageSize?: number;
   pageSizeOptions?: number[];
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
 }
 
 export function PaginationControls({
   currentPage,
   totalPages,
-  pageSize,
+  pageSize = 10,
   pageSizeOptions = [5, 10, 20],
-  onPageChange,
-  onPageSizeChange,
+  onPageChange = () => {},
+  onPageSizeChange = () => {},
 }: Props) {
   return (
     <div className="flex items-center justify-between px-4 py-3">

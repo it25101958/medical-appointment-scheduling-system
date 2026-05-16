@@ -19,7 +19,7 @@ export default function NotFound() {
         </h1>
 
         <p className="body-text max-w-xl">
-          The medical resource or page you are looking for isn't here. Please
+          The medical resource or page you are looking for isn&apos;t here. Please
           check the URL or return to the dashboard.
         </p>
       </div>

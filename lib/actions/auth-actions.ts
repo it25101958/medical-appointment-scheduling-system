@@ -2,10 +2,25 @@
 
 import { cookies } from "next/headers";
 import { apiRequest } from "@/lib/api-client";
+import { getErrorMessage } from "@/lib/utils";
 
-export async function loginAction(values: any) {
+interface LoginValues {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  token: string;
+  user: {
+    roleType: number;
+    roleName: string;
+    accessLevel: string;
+  };
+}
+
+export async function loginAction(values: LoginValues) {
   try {
-    const data = await apiRequest("/auth/login", {
+    const data = await apiRequest<LoginResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify(values),
     });
@@ -29,7 +44,7 @@ export async function loginAction(values: any) {
       roleName: data.user.roleName,
       accessLevel: data.user.accessLevel,
     };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: getErrorMessage(error) };
   }
 }

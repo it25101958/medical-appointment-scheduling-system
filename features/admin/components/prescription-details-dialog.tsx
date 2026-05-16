@@ -15,15 +15,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { CalendarDays, Pill, Stethoscope, User, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface PrescriptionItem {
+  prescriptionItemId: number;
+  medicationName: string;
+  genericName?: string;
+  dosage: string;
+  quantity: number;
+  specialInstructions?: string;
+}
+
+interface PrescriptionDetails {
+  prescriptionDate?: string;
+  status: string;
+  patientName: string;
+  doctorName: string;
+  appointmentId: number;
+  createdAt: string;
+  notes?: string;
+  items?: PrescriptionItem[];
+}
 
 export function PrescriptionDetailsDialog({
   prescription,
   onClose,
 }: {
-  prescription: any;
+  prescription: PrescriptionDetails | null;
   onClose: () => void;
 }) {
   if (!prescription) return null;
@@ -46,7 +65,9 @@ export function PrescriptionDetailsDialog({
             <p className="text-sm text-muted-foreground dark:text-muted-foreground">
               Issued:{" "}
               <span className="text-foreground dark:text-foreground">
-                {new Date(prescription.prescriptionDate).toDateString()}
+                {new Date(
+                  prescription.prescriptionDate ?? prescription.createdAt,
+                ).toDateString()}
               </span>
             </p>
           </div>
@@ -107,7 +128,7 @@ export function PrescriptionDetailsDialog({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {prescription.items?.map((item: any) => (
+                {prescription.items?.map((item) => (
                   <TableRow
                     key={item.prescriptionItemId}
                     className="hover:bg-muted/10 transition-colors"

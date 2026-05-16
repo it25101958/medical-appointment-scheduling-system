@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardShell from "@/components/dashboard/dashboard-shell";
+import DashboardShell from "@/features/dashboard/components/dashboard-shell";
 import {
   Calendar,
   Users,
@@ -59,7 +59,7 @@ export default function DoctorDashboard() {
       badgeText="Medical Professional Portal"
       title={
         <>
-          Doctor's Console <br />
+          Doctor&apos;s Console <br />
           <span>Clinical Overview & Patient Care</span>
         </>
       }

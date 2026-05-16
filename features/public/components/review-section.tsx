@@ -145,7 +145,7 @@ export default function ReviewSection() {
 
                 <div className="px-8 pb-4">
                   <p className="text-xl md:text-2xl font-light leading-relaxed text-foreground tracking-tight">
-                    "{review.content}"
+                    &quot;{review.content}&quot;
                   </p>
                 </div>
 

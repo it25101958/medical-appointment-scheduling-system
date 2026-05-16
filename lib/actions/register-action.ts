@@ -1,8 +1,14 @@
 "use server";
 
 import { apiRequest } from "@/lib/api-client";
+import { getErrorMessage } from "@/lib/utils";
 
-export async function registerAction(values: any) {
+interface RegisterValues {
+  role: string;
+  [key: string]: unknown;
+}
+
+export async function registerAction(values: RegisterValues) {
   try {
     const endpoint = `/auth/register/${values.role.toLowerCase()}`;
 
@@ -12,7 +18,7 @@ export async function registerAction(values: any) {
     });
 
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: getErrorMessage(error) };
   }
 }

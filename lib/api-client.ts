@@ -3,7 +3,10 @@ import { cookies } from "next/headers";
 
 const BASE_URL = process.env.INTERNAL_BACKEND_URL;
 
-export async function apiRequest(endpoint: string, options: RequestInit = {}) {
+export async function apiRequest<T = unknown>(
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<T> {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
@@ -27,5 +30,5 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   }
 
   const text = await response.text();
-  return text ? JSON.parse(text) : null;
+  return text ? (JSON.parse(text) as T) : (null as T);
 }

@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { UserDetailsDialog } from "./UserDetailsDialog";
 
 export interface User {
   userId: number;
@@ -85,7 +84,7 @@ export function UserTable({
                   <TableCell className="px-4 py-2">
                     <span
                       className="text-sm font-medium text-foreground"
-                      onClick={() => onViewUserDetails(user.userId)}
+                      onClick={() => onViewUserDetails?.(user.userId)}
                     >
                       {user.firstName} {user.lastName}
                     </span>

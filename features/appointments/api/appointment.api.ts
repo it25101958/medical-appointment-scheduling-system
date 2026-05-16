@@ -4,18 +4,21 @@ import {
   AppointmentCreateRequest,
   AppointmentUpdateRequest,
   AppointmentStatusUpdateRequest,
+  AppointmentResponse,
 } from "../types/appointment.types";
 
 const BASE_URL = "/appointment"; // will append to INTERNAL_BACKEND_URL in api-client
 
 export const appointmentApi = {
   getAll: async () => {
-    const data = await apiRequest(BASE_URL);
+    const data = await apiRequest<AppointmentResponse[]>(BASE_URL);
     return data; // any[] inferred
   },
 
   getById: async (appointmentId: number) => {
-    const data = await apiRequest(`${BASE_URL}/${appointmentId}`);
+    const data = await apiRequest<AppointmentResponse>(
+      `${BASE_URL}/${appointmentId}`,
+    );
     return data;
   },
 

@@ -122,7 +122,7 @@ export default function Portal() {
           variants={fadeIn}
           transition={{ duration: 2 }}
         >
-          View today's appointments, manage users, and handle admin tasks all
+          View today&apos;s appointments, manage users, and handle admin tasks all
           from this dashboard.
         </motion.p>
 

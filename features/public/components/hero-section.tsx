@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "./ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Calendar, CheckCircle2 } from "lucide-react";
 import HeroVisual from "./hero-visual";
 
@@ -20,7 +20,7 @@ export default function Hero() {
 
         <p className="body-text ">
           Skip the waiting room. Connect with world-class specialists and manage
-          your family's health journey all from one secure platform.
+          your family&apos;s health journey all from one secure platform.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 mt-8">

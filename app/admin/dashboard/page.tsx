@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardShell from "@/components/dashboard/dashboard-shell";
+import DashboardShell from "@/features/dashboard/components/dashboard-shell";
 import { FileText, ClipboardList, FilePlus, Users, Bed } from "lucide-react";
 import { useRouter } from "next/navigation";
 

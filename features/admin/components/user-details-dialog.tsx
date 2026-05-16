@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
 import { apiRequest } from "@/lib/api-client";
+import { formatValidationErrors, getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
 
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -24,8 +24,6 @@ import {
   User2,
   Phone,
   MapPin,
-  Shield,
-  CalendarClock,
   Mail,
   Hash,
 } from "lucide-react";
@@ -33,10 +31,10 @@ import * as z from "zod";
 
 // --- Zod schema for editable fields
 const userUpdateSchema = z.object({
-  firstName: z.string().min(1).optional(),
-  lastName: z.string().min(1).optional(),
-  phone: z.string().min(1).optional(),
-  address: z.string().min(1).optional(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  phone: z.string().min(1),
+  address: z.string().min(1),
 });
 
 export interface UserDetails {
@@ -85,9 +83,9 @@ export function UserDetailsDialog({
         toast.success("User updated successfully");
         onUpdated?.();
         onOpenChange(false);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log(err);
-        toast.error(err.message || "Failed to update user");
+        toast.error(getErrorMessage(err, "Failed to update user"));
       } finally {
         setSaving(false);
       }
@@ -172,11 +170,7 @@ export function UserDetailsDialog({
                     </InputGroup>
                     {field.state.meta.errors && (
                       <p className="text-red-500 text-xs">
-                        {field.state.meta.errors
-                          .map((err: any) =>
-                            typeof err === "object" ? err.message : err,
-                          )
-                          .join(", ")}
+                        {formatValidationErrors(field.state.meta.errors)}
                       </p>
                     )}
                   </Field>
@@ -201,11 +195,7 @@ export function UserDetailsDialog({
                     </InputGroup>
                     {field.state.meta.errors && (
                       <p className="text-red-500 text-xs">
-                        {field.state.meta.errors
-                          .map((err: any) =>
-                            typeof err === "object" ? err.message : err,
-                          )
-                          .join(", ")}
+                        {formatValidationErrors(field.state.meta.errors)}
                       </p>
                     )}
                   </Field>
@@ -233,11 +223,7 @@ export function UserDetailsDialog({
                     </InputGroup>
                     {field.state.meta.errors && (
                       <p className="text-red-500 text-xs">
-                        {field.state.meta.errors
-                          .map((err: any) =>
-                            typeof err === "object" ? err.message : err,
-                          )
-                          .join(", ")}
+                        {formatValidationErrors(field.state.meta.errors)}
                       </p>
                     )}
                   </Field>
@@ -265,11 +251,7 @@ export function UserDetailsDialog({
                     </InputGroup>
                     {field.state.meta.errors && (
                       <p className="text-red-500 text-xs">
-                        {field.state.meta.errors
-                          .map((err: any) =>
-                            typeof err === "object" ? err.message : err,
-                          )
-                          .join(", ")}
+                        {formatValidationErrors(field.state.meta.errors)}
                       </p>
                     )}
                   </Field>

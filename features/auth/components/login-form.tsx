@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, Lock, Mail } from "lucide-react";
 import { loginAction } from "@/lib/actions/auth-actions";
+import { formatValidationErrors } from "@/lib/utils";
 
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
@@ -75,11 +76,7 @@ export function LoginForm() {
               </InputGroup>
               {field.state.meta.errors && (
                 <p className="form-error">
-                  {field.state.meta.errors
-                    .map((error: any) =>
-                      typeof error === "object" ? error.message : error,
-                    )
-                    .join(", ")}
+                  {formatValidationErrors(field.state.meta.errors)}
                 </p>
               )}
             </Field>
@@ -109,11 +106,7 @@ export function LoginForm() {
               </InputGroup>
               {field.state.meta.errors && (
                 <p className="form-error">
-                  {field.state.meta.errors
-                    .map((error: any) =>
-                      typeof error === "object" ? error.message : error,
-                    )
-                    .join(", ")}
+                  {formatValidationErrors(field.state.meta.errors)}
                 </p>
               )}
             </Field>
