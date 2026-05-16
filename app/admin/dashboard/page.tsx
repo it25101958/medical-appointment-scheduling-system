@@ -1,7 +1,14 @@
 "use client";
 
-import DashboardShell from "@/features/dashboard/components/dashboard-shell";
-import { FileText, ClipboardList, FilePlus, Users, Bed } from "lucide-react";
+import { DashboardShell } from "@/features/dashboard";
+import {
+  FileText,
+  ClipboardList,
+  FilePlus,
+  Users,
+  Bed,
+  Calendar,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
@@ -32,7 +39,18 @@ export default function AdminPage() {
       buttonText: "View Patients",
       action: () => router.push("/admin/Patients"),
     },
-    { icon: Bed, title: "Rooms", buttonText: "Manage Rooms", action: null },
+    {
+      icon: Bed,
+      title: "Rooms",
+      buttonText: "Manage Rooms",
+      action: () => router.push("/admin/rooms"),
+    },
+    {
+      icon: Calendar,
+      title: "Room Schedules",
+      buttonText: "Schedule Rooms",
+      action: () => router.push("/admin/room-schedule"),
+    },
   ];
 
   return (

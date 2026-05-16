@@ -36,18 +36,34 @@ export function AppointmentTable({
 
   return (
     <>
-      <div className="rounded-xl border bg-card shadow-sm">
-        <Table>
+      <div className="bg-card rounded-lg border border-border overflow-x-auto">
+        <Table className="min-w-[1000px]">
           <TableHeader>
-            <TableRow>
-              <TableHead>Appointment</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead>Patient</TableHead>
-              <TableHead>Doctor</TableHead>
-              <TableHead>Room</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+            <TableRow className="bg-muted/30">
+              <TableHead className="px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
+                Appointment
+              </TableHead>
+              <TableHead className="px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
+                Date
+              </TableHead>
+              <TableHead className="px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
+                Time
+              </TableHead>
+              <TableHead className="px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
+                Patient
+              </TableHead>
+              <TableHead className="px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
+                Doctor
+              </TableHead>
+              <TableHead className="px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
+                Room
+              </TableHead>
+              <TableHead className="px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
+                Status
+              </TableHead>
+              <TableHead className="px-4 py-2 text-center text-xs font-medium tracking-wide text-muted-foreground">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -63,30 +79,41 @@ export function AppointmentTable({
               </TableRow>
             ) : (
               appointments.map((appointment) => (
-                <TableRow key={appointment.appointmentId}>
-                  <TableCell>
+                <TableRow
+                  key={appointment.appointmentId}
+                  className="hover:bg-muted/20"
+                >
+                  <TableCell className="px-4 py-2">
                     <div className="space-y-1">
-                      <p className="text-sm">
-                        #{appointment.appointmentNumber}
-                      </p>
+                      <p className="text-sm">{appointment.appointmentNumber}</p>
                       <p className="text-xs text-muted-foreground">
                         {appointment.appointmentType}
                       </p>
                     </div>
                   </TableCell>
 
-                  <TableCell>{appointment.appointmentDate}</TableCell>
-                  <TableCell>{appointment.appointmentTime}</TableCell>
-                  <TableCell>Patient #{appointment.patientId}</TableCell>
-                  <TableCell>Doctor #{appointment.doctorId}</TableCell>
-                  <TableCell>Room #{appointment.roomId}</TableCell>
+                  <TableCell className="px-4 py-2">
+                    {appointment.appointmentDate}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    {appointment.appointmentTime}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    Patient {appointment.patientId}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    Doctor {appointment.doctorId}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    Room {appointment.roomId}
+                  </TableCell>
 
-                  <TableCell>
+                  <TableCell className="px-4 py-2">
                     <AppointmentStatusBadge status={appointment.status} />
                   </TableCell>
 
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+                  <TableCell className="px-4 py-2 text-center">
+                    <div className="flex items-center justify-center gap-2">
                       <Button
                         variant="outline"
                         size="icon"

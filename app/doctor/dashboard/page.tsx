@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardShell from "@/features/dashboard/components/dashboard-shell";
+import { DashboardShell } from "@/features/dashboard";
 import {
   Calendar,
   Users,
@@ -8,6 +8,7 @@ import {
   ClipboardList,
   FilePlus,
   Activity,
+  Clock,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -51,6 +52,12 @@ export default function DoctorDashboard() {
       title: "Lab Reports",
       buttonText: "View Results",
       action: () => router.push("/doctor/lab-results"),
+    },
+    {
+      icon: Clock,
+      title: "Room Schedules",
+      buttonText: "View Schedules",
+      action: () => router.push("/doctor/room-schedule"),
     },
   ];
 

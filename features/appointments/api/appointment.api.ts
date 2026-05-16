@@ -12,7 +12,7 @@ const BASE_URL = "/appointment"; // will append to INTERNAL_BACKEND_URL in api-c
 export const appointmentApi = {
   getAll: async () => {
     const data = await apiRequest<AppointmentResponse[]>(BASE_URL);
-    return data; // any[] inferred
+    return data;
   },
 
   getById: async (appointmentId: number) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardShell from "@/features/dashboard/components/dashboard-shell";
+import { DashboardShell } from "@/features/dashboard";
 import {
   CalendarPlus,
   FileText,

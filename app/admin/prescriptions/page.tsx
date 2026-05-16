@@ -1,6 +1,5 @@
 import { apiRequest } from "@/lib/api-client";
-import { PrescriptionList } from "@/features/admin/components/prescription-list";
-import { PaginationControls } from "@/features/admin/components/pagination-controls";
+import { PrescriptionList, PaginationControls } from "@/features/admin";
 
 interface PrescriptionListItem {
   prescriptionId: number;

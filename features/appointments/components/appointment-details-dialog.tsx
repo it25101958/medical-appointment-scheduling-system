@@ -33,8 +33,8 @@ export function AppointmentDetailsDialog({ appointment, onClose }: Props) {
 
   return (
     <Dialog open={!!appointment} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-[1100px] rounded-2xl p-0">
-        <DialogHeader className="border-b px-6 py-5">
+      <DialogContent className="boxwidth">
+        <DialogHeader className="px-6 py-5">
           <DialogTitle className="text-xl font-normal">
             Appointment Details
           </DialogTitle>
