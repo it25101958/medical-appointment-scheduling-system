@@ -26,8 +26,15 @@ export function LoginForm() {
       const result = await loginAction(value);
 
       if (result.success) {
-        toast.success("Login successful!");
-        router.push("/admin/dashboard");
+        const redirects: Record<number, string> = {
+          1: "/admin/dashboard",
+          2: "/staff/dashboard",
+          3: "/doctor/dashboard",
+          4: "/patient/dashboard",
+        };
+
+        const target = redirects[result.role as number] || "/patient/dashboard";
+        router.push(target);
         router.refresh();
       } else {
         toast.error("Authentication Failed", {
