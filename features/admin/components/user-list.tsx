@@ -83,7 +83,7 @@ export function UserTable({
 
                   <TableCell className="px-4 py-2">
                     <span
-                      className="text-sm font-medium text-foreground"
+                      className="text-sm font-medium text-foreground hover:text-primary hover:underline cursor-pointer"
                       onClick={() => onViewUserDetails?.(user.userId)}
                     >
                       {user.firstName} {user.lastName}

@@ -20,13 +20,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  User2,
-  Phone,
-  MapPin,
-  Mail,
-  Hash,
-} from "lucide-react";
+import { User2, Phone, MapPin, Mail, Hash } from "lucide-react";
 import * as z from "zod";
 
 // --- Zod schema for editable fields

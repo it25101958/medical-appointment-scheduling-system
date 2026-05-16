@@ -24,7 +24,7 @@ export default async function AdminPrescriptionsPage({
   const params = await searchParams;
   const page = Number(params.page) || 0;
   const data = await apiRequest<PrescriptionsResponse>(
-    `/prescription?page=${page}&size=10`,
+    `/prescription?page=${page}&size=5`,
     {
       method: "GET",
       cache: "no-store",

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { UserDetailsDialog } from "@/features/admin/components/user-details-dialog";
 import { apiRequest } from "@/lib/api-client";
-import { UserTable, User } from "@/features/admin/components/user-table";
+import { UserTable, User } from "@/features/admin/components/user-list";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";

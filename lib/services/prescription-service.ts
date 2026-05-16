@@ -29,9 +29,9 @@ export interface Prescription {
 
 export async function getPaginatedPrescriptions(
   page: number = 0,
-  size: number = 10,
+  size: number = 5,
 ): Promise<PaginatedResponse<Prescription>> {
-  return await apiRequest(`/api/v1/prescription?page=${page}&size=${size}`, {
+  return await apiRequest(`prescription?page=${page}&size=${size}`, {
     method: "GET",
     cache: "no-store",
   });
