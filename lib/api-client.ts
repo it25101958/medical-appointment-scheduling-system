@@ -1,3 +1,4 @@
+"use server";
 import { cookies } from "next/headers";
 
 const BASE_URL = process.env.INTERNAL_BACKEND_URL;
@@ -24,5 +25,6 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
     throw new Error(errorData.message || "Something went wrong");
   }
 
-  return response.json();
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
 }
