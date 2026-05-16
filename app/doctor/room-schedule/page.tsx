@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button, ScrollArea, DataTable, type Column } from "@/components/ui";
 import { RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -78,75 +77,31 @@ export default function DoctorRoomSchedulePage() {
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <ScrollArea className="bg-card rounded-lg border-b border-border overflow-x-auto">
-          <table className="min-w-[900px] w-full text-sm">
-            <thead className="bg-muted/30">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Schedule ID
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Room
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Day
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Time Slot
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Created At
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-4 py-10 text-center text-sm text-muted-foreground"
-                  >
-                    Loading your schedules...
-                  </td>
-                </tr>
-              ) : schedules.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-4 py-10 text-center text-sm text-muted-foreground"
-                  >
-                    No schedules assigned yet.
-                  </td>
-                </tr>
-              ) : (
-                schedules.map((schedule) => (
-                  <tr
-                    key={schedule.roomScheduleId}
-                    className="border-t border-border hover:bg-muted/20"
-                  >
-                    <td className="px-4 py-4 font-medium text-muted-foreground">
-                      {schedule.roomScheduleId}
-                    </td>
-                    <td className="px-4 py-4 text-sm">
-                      Room {schedule.roomNumber}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-muted-foreground">
-                      {schedule.dayOfWeek}
-                    </td>
-                    <td className="px-4 py-4 text-sm">
-                      {schedule.startTime} - {schedule.endTime}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-muted-foreground">
-                      {new Date(schedule.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </ScrollArea>
-      </div>
+      <DataTable
+        columns={[
+          { header: "Schedule ID", accessor: "roomScheduleId" },
+          {
+            header: "Room",
+            render: (schedule: RoomScheduleResponse) =>
+              `Room ${schedule.roomNumber}`,
+          },
+          { header: "Day", accessor: "dayOfWeek" },
+          {
+            header: "Time Slot",
+            render: (schedule: RoomScheduleResponse) =>
+              `${schedule.startTime} - ${schedule.endTime}`,
+          },
+          {
+            header: "Created At",
+            render: (schedule: RoomScheduleResponse) =>
+              new Date(schedule.createdAt).toLocaleDateString(),
+          },
+        ]}
+        data={schedules}
+        pageable={true}
+        pageSize={10}
+        emptyMessage="No schedules assigned yet."
+      />
     </div>
   );
 }

@@ -293,7 +293,7 @@ export function UserDetailsDialog({
                   {new Date(user.createdAt).toLocaleString()}
                 </span>
               </div>
-              <div className="flex flex-col p-3 bg-muted/10 rounded-md shadow-sm">
+              <div className="flex flex-col p-3 bg-muted/10 rounded-md">
                 <span className="font-medium">Updated At</span>
                 <span className="text-foreground">
                   {new Date(user.updatedAt).toLocaleString()}

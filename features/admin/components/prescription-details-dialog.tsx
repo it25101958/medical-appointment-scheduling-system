@@ -84,7 +84,7 @@ export function PrescriptionDetailsDialog({ prescription, onClose }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
             {/* Sidebar Overview Card */}
             <div className="space-y-4 lg:col-span-1">
-              <div className="rounded-xl border border-border bg-card p-4 space-y-4 shadow-sm">
+              <div className="rounded-xl border border-border bg-card p-4 space-y-4">
                 <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
                   Overview
                 </h4>
@@ -154,7 +154,7 @@ export function PrescriptionDetailsDialog({ prescription, onClose }: Props) {
 
               {/* Notes panel */}
               {prescription.notes && (
-                <div className="rounded-xl border border-border bg-card p-4 space-y-2.5 shadow-sm">
+                <div className="rounded-xl border border-border bg-card p-4 space-y-2.5">
                   <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
                     <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                     <span>Clinical Notes</span>
@@ -175,7 +175,7 @@ export function PrescriptionDetailsDialog({ prescription, onClose }: Props) {
                 </h3>
               </div>
 
-              <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+              <div className="rounded-xl border border-border bg-card overflow-hidden">
                 <Table>
                   <TableHeader className="bg-muted/40 border-b border-border">
                     <TableRow className="hover:bg-transparent">

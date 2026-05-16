@@ -8,6 +8,7 @@ import {
   Users,
   Bed,
   Calendar,
+  FlaskConical,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -26,6 +27,12 @@ export default function AdminPage() {
       title: "Laboratory",
       buttonText: "Manage Laboratory",
       action: () => router.push("/admin/laboratory"),
+    },
+    {
+      icon: FlaskConical,
+      title: "Lab Tests",
+      buttonText: "Manage Lab Tests",
+      action: () => router.push("/admin/labtest"),
     },
     {
       icon: FilePlus,

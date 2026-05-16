@@ -8,6 +8,7 @@ import {
   ClipboardList,
   FileText,
   Clock,
+  FlaskConical,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -39,6 +40,12 @@ export default function StaffDashboard() {
       title: "Lab Orders",
       buttonText: "Process Lab",
       action: () => router.push("/staff/laboratory"),
+    },
+    {
+      icon: FlaskConical,
+      title: "Lab Tests",
+      buttonText: "Review Tests",
+      action: () => router.push("/staff/labtest"),
     },
     {
       icon: FileText,

@@ -76,6 +76,21 @@ const services = [
   },
 ];
 
+const operations = [
+  {
+    title: "Laboratory",
+    href: "/admin/laboratory",
+    desc: "Manage laboratory records.",
+    icon: FlaskConical,
+  },
+  {
+    title: "Lab Tests",
+    href: "/admin/labtest",
+    desc: "Manage test definitions.",
+    icon: FlaskConical,
+  },
+];
+
 const NavigationContainer = () => {
   return (
     <header className="col-span-full flex items-center justify-between w-full">
@@ -151,6 +166,38 @@ const NavigationContainer = () => {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
+              <NavigationMenuTrigger className="bg-transparent">
+                Operations
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[380px] gap-3 p-4 md:w-[460px] md:grid-cols-2">
+                  {operations.map((operation) => (
+                    <li key={operation.title}>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href={operation.href}
+                          className="flex items-start gap-4 select-none rounded-lg p-3 leading-none no-underline outline-none transition-all duration-200 hover:bg-primary/5 group"
+                        >
+                          <div className=" flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
+                            <operation.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                          </div>
+                          <div className="space-y-1">
+                            <div className="text-sm font-semibold leading-none group-hover:text-primary">
+                              {operation.title}
+                            </div>
+                            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground/80">
+                              {operation.desc}
+                            </p>
+                          </div>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
               <NavigationMenuLink
                 asChild
                 className={cn(navigationMenuTriggerStyle(), "bg-transparent")}
@@ -203,6 +250,18 @@ const NavigationContainer = () => {
                   className="p-3 text-sm font-medium hover:bg-muted rounded-xl transition-colors"
                 >
                   Find a Doctor
+                </Link>
+                <Link
+                  href="/admin/laboratory"
+                  className="p-3 text-sm font-medium hover:bg-muted rounded-xl transition-colors"
+                >
+                  Laboratory
+                </Link>
+                <Link
+                  href="/admin/labtest"
+                  className="p-3 text-sm font-medium hover:bg-muted rounded-xl transition-colors"
+                >
+                  Lab Tests
                 </Link>
                 <Link
                   href="/services"
