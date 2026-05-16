@@ -22,6 +22,7 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
+    console.log(errorData);
     throw new Error(errorData.message || "Something went wrong");
   }
 
