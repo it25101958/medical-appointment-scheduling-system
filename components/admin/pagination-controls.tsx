@@ -32,38 +32,36 @@ export function PaginationControls({
       <p className="text-sm mr-5 text-muted-foreground font-medium">
         Page {currentPage + 1} of {totalPages}
       </p>
-      <div className="flex items-center gap-3">
-        <div className="flex gap-2">
+      <div className="flex items-center justify-between px-4 bg-card flex-wrap gap-2">
+        {/* Left side: Previous / Next buttons */}
+        <div className="flex items-center gap-2">
           <Button
-            variant="outline"
             size="sm"
+            variant="outline"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 0}
-            className="px-3"
           >
-            <ChevronLeft className="h-4 w-4" />
             Previous
           </Button>
 
           <Button
-            variant="outline"
             size="sm"
+            variant="outline"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage >= totalPages - 1}
-            className="px-3"
           >
             Next
-            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
+        {/* Right side: Page size selector */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Page size:</span>
           <Select
             value={pageSize.toString()}
             onValueChange={(val) => onPageSizeChange(Number(val))}
           >
-            <SelectTrigger className="w-[125px]">
+            <SelectTrigger className="w-28">
               <SelectValue placeholder="Page Size" />
             </SelectTrigger>
             <SelectContent>
