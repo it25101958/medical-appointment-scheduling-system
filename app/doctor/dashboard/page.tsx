@@ -37,8 +37,8 @@ export default function DoctorDashboard() {
     {
       icon: FilePlus,
       title: "Prescriptions",
-      buttonText: "Issue New",
-      action: () => router.push("/doctor/prescriptions/new"),
+      buttonText: "View Prescription",
+      action: () => router.push("/doctor/prescriptions"),
     },
     {
       icon: Activity,
