@@ -35,26 +35,26 @@ export function UserTable({
   onEditRole,
 }: UserTableProps) {
   return (
-    <ScrollArea className="bg-card">
-      <Table className="min-w-[900px]">
+    <ScrollArea className="bg-card rounded-lg border border-border overflow-x-auto">
+      <Table className="min-w-[1000px]">
         <TableHeader>
-          <TableRow className="bg-muted/40">
-            <TableHead className="w-[90px] text-left tableHead">
-              User ID
+          <TableRow className="bg-muted/30">
+            <TableHead className="w-[80px] px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
+              ID
             </TableHead>
-            <TableHead className="min-w-[180px] text-left tableHead">
+            <TableHead className="w-[180px] px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
               Name
             </TableHead>
-            <TableHead className="min-w-[260px] text-left tableHead">
+            <TableHead className="w-[220px] px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
               Email
             </TableHead>
-            <TableHead className="w-[140px] text-left tableHead">
+            <TableHead className="w-[140px] px-4 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground">
               Role
             </TableHead>
-            <TableHead className="w-[130px] text-center tableHead">
+            <TableHead className="w-[100px] px-4 py-2 text-center text-xs font-medium tracking-wide text-muted-foreground">
               Status
             </TableHead>
-            <TableHead className="w-[260px] text-center tableHead">
+            <TableHead className="w-[50px] px-4 py-2 text-center text-xs font-medium tracking-wide text-muted-foreground">
               Actions
             </TableHead>
           </TableRow>
@@ -65,7 +65,7 @@ export function UserTable({
             <TableRow>
               <TableCell
                 colSpan={6}
-                className="h-28 text-center text-sm text-muted-foreground"
+                className="text-center text-sm py-6 text-muted-foreground"
               >
                 No users found.
               </TableCell>
@@ -73,30 +73,29 @@ export function UserTable({
           ) : (
             users.map((user) => {
               const isSystemAdmin = user.userId === SYSTEM_ADMIN_ID;
-
               return (
-                <TableRow key={user.userId} className="hover:bg-muted/30">
-                  <TableCell className="font-medium text-muted-foreground">
-                    #{user.userId}
+                <TableRow key={user.userId} className="hover:bg-muted/20">
+                  <TableCell className="px-4 py-2 font-medium text-muted-foreground">
+                    {user.userId}
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="px-4 py-2">
                     <span className="text-sm font-medium text-foreground">
                       {user.firstName} {user.lastName}
                     </span>
                   </TableCell>
 
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="px-4 py-2 text-sm text-muted-foreground">
                     {user.email}
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="px-4 py-2">
                     <span className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
                       {user.roleName}
                     </span>
                   </TableCell>
 
-                  <TableCell className="text-center">
+                  <TableCell className="px-4 py-2 text-center">
                     <span
                       className={
                         user.isActive
@@ -108,7 +107,7 @@ export function UserTable({
                     </span>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="ml-40 text-left">
                     <div className="flex items-center justify-center gap-2">
                       <Button
                         size="sm"
