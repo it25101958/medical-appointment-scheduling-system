@@ -177,4 +177,8 @@
   .table-head-text {
     @apply font-light tracking-wider text-base;
   }
+
+  .boxwidth {
+    @apply !w-[60vw] !max-w-[1200px] !h-[80vh] rounded-xl overflow-hidden bg-card dark:bg-card p-6;
+  }
 }

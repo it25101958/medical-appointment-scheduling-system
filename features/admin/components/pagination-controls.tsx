@@ -27,7 +27,7 @@ export function PaginationControls({
   onPageSizeChange = () => {},
 }: Props) {
   return (
-    <div className="flex items-center justify-between px-4 py-3">
+    <div className="flex items-center justify-between pl-4 py-3">
       <p className="text-sm mr-5 text-muted-foreground font-medium">
         Page {currentPage + 1} of {totalPages}
       </p>
