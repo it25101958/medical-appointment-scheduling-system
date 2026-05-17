@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   Button,
   Input,
@@ -15,8 +15,12 @@ import {
   PopoverContent,
   PopoverTrigger,
   DataTable,
-  type Column,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui";
+import { highlightText } from "@/lib/highlight-search";
 import { Plus, RefreshCcw, Edit3, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -27,21 +31,16 @@ import {
 } from "@/features/room-schedule";
 import { Room, getRooms } from "@/lib/services/room-service";
 import { apiRequest } from "@/lib/api-client";
+import { getErrorMessage } from "@/lib/utils";
 
-interface DoctorOption {
-  id: number;
-  name: string;
-  roleType: number;
+interface UserOption {
+  userId: number;
+  firstName: string;
+  lastName: string;
 }
 
 interface FormValues extends RoomScheduleRequest {
   selectedDate: string; // YYYY-MM-DD format
-}
-
-function getErrorMessage(error: unknown) {
-  if (typeof error === "string") return error;
-  if (error instanceof Error) return error.message;
-  return "Something went wrong";
 }
 
 function getDayOfWeek(dateString: string): DayOfWeek {
@@ -69,17 +68,102 @@ function formatDateForDisplay(dateString: string): string {
   });
 }
 
+function normalize(value: string) {
+  return value.trim().toLowerCase();
+}
+
 export default function AdminRoomSchedulePage() {
   const [schedules, setSchedules] = useState<RoomScheduleResponse[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [doctors, setDoctors] = useState<DoctorOption[]>([]);
+  const [doctors, setDoctors] = useState<UserOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchedule, setSelectedSchedule] =
     useState<RoomScheduleResponse | null>(null);
+
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+
+  const filteredSchedules = useMemo(() => {
+    const query = normalize(deferredSearchQuery);
+    if (!query) return schedules;
+    return schedules.filter((schedule) => {
+      const haystack = [
+        schedule.roomScheduleId?.toString(),
+        schedule.roomNumber?.toString(),
+        schedule.doctorName,
+        schedule.dayOfWeek,
+        schedule.startTime,
+        schedule.endTime,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [deferredSearchQuery, schedules]);
+
+  const columns = useMemo(
+    () => [
+      {
+        header: "Schedule ID",
+        render: (schedule: RoomScheduleResponse) =>
+          highlightText(
+            schedule.roomScheduleId?.toString() || "",
+            deferredSearchQuery,
+          ),
+      },
+      {
+        header: "Room",
+        render: (schedule: RoomScheduleResponse) =>
+          highlightText(`Room ${schedule.roomNumber}`, deferredSearchQuery),
+      },
+      {
+        header: "Doctor",
+        render: (schedule: RoomScheduleResponse) =>
+          highlightText(schedule.doctorName || "", deferredSearchQuery),
+      },
+      {
+        header: "Day",
+        render: (schedule: RoomScheduleResponse) =>
+          highlightText(schedule.dayOfWeek || "", deferredSearchQuery),
+      },
+      {
+        header: "Time Slot",
+        render: (schedule: RoomScheduleResponse) =>
+          highlightText(
+            `${schedule.startTime} - ${schedule.endTime}`,
+            deferredSearchQuery,
+          ),
+      },
+      {
+        header: "Actions",
+        render: (schedule: RoomScheduleResponse) => (
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => openEditDialog(schedule)}
+            >
+              <Edit3 className="mr-2 h-4 w-4" /> Edit
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => openDeleteDialog(schedule)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" /> Delete
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [deferredSearchQuery, openEditDialog, openDeleteDialog],
+  );
+
   const [formValues, setFormValues] = useState<FormValues>({
     roomId: 0,
     doctorId: 0,
@@ -93,21 +177,60 @@ export default function AdminRoomSchedulePage() {
     fetchData();
   }, []);
 
+  function normalizeDoctorName(name: string): string {
+    return name
+      .replace(/^dr\.?\s*/i, "")
+      .trim()
+      .toLowerCase();
+  }
+
+  function getDoctorDisplayName(doctor: UserOption): string {
+    return `Dr. ${doctor.lastName}`;
+  }
+
+  async function getAllSchedulesForDoctors(doctorsList: UserOption[]) {
+    const settled = await Promise.allSettled(
+      doctorsList.map((doctor) =>
+        roomScheduleApi
+          .getAllDoctorSchedules(doctor.userId)
+          .then((schedules) => ({
+            doctorId: doctor.userId,
+            schedules,
+          })),
+      ),
+    );
+
+    const merged: RoomScheduleResponse[] = [];
+    for (const item of settled) {
+      if (item.status === "fulfilled") {
+        merged.push(...(item.value.schedules || []));
+      }
+    }
+
+    const uniqueById = new Map<number, RoomScheduleResponse>();
+    for (const schedule of merged) {
+      uniqueById.set(schedule.roomScheduleId, schedule);
+    }
+
+    return Array.from(uniqueById.values()).sort(
+      (a, b) => a.roomScheduleId - b.roomScheduleId,
+    );
+  }
+
   async function fetchData() {
     setIsLoading(true);
     try {
-      const [schedulesData, roomsData, doctorsData] = await Promise.all([
-        apiRequest<RoomScheduleResponse[]>("/room-schedule", {
-          method: "GET",
-          cache: "no-store",
-        }).catch(() => []),
+      const [roomsData, doctorsData] = await Promise.all([
         getRooms().catch(() => []),
-        apiRequest<DoctorOption[]>("/users/role/3", {
+        apiRequest<UserOption[]>("/users/role/3", {
           method: "GET",
           cache: "no-store",
         }).catch(() => []),
       ]);
-      setSchedules(schedulesData || []);
+
+      const schedulesData = await getAllSchedulesForDoctors(doctorsData || []);
+
+      setSchedules(schedulesData);
       setRooms(roomsData || []);
       setDoctors(doctorsData || []);
     } catch (error) {
@@ -132,15 +255,32 @@ export default function AdminRoomSchedulePage() {
   }
 
   function openEditDialog(schedule: RoomScheduleResponse) {
+    const matchedRoom = rooms.find(
+      (room) => String(room.roomNumber) === String(schedule.roomNumber),
+    );
+
+    const matchedDoctor = doctors.find(
+      (doctor) =>
+        normalizeDoctorName(getDoctorDisplayName(doctor)) ===
+        normalizeDoctorName(schedule.doctorName),
+    );
+
     setSelectedSchedule(schedule);
     setFormValues({
-      roomId: 0,
-      doctorId: 0,
+      roomId: matchedRoom?.roomId || 0,
+      doctorId: matchedDoctor?.userId || 0,
       dayOfWeek: schedule.dayOfWeek,
       startTime: schedule.startTime,
       endTime: schedule.endTime,
       selectedDate: new Date().toISOString().split("T")[0],
     });
+
+    if (!matchedRoom || !matchedDoctor) {
+      toast.warning(
+        "Could not fully prefill room/doctor. Please re-select before saving.",
+      );
+    }
+
     setDialogOpen(true);
   }
 
@@ -232,46 +372,34 @@ export default function AdminRoomSchedulePage() {
         </div>
       </div>
 
+      <Card className="border-border/60 bg-card/80 backdrop-blur mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold">
+            Search schedules
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
+          <div className="grid gap-2">
+            <Label htmlFor="schedule-search">Quick search</Label>
+            <Input
+              id="schedule-search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search by room, doctor, day, or time"
+            />
+          </div>
+          <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+            {filteredSchedules.length} of {schedules.length} schedules shown
+          </div>
+        </CardContent>
+      </Card>
+
       <DataTable
-        columns={[
-          { header: "Schedule ID", accessor: "roomScheduleId" },
-          {
-            header: "Room",
-            render: (schedule: RoomScheduleResponse) =>
-              `Room ${schedule.roomNumber}`,
-          },
-          { header: "Doctor", accessor: "doctorName" },
-          { header: "Day", accessor: "dayOfWeek" },
-          {
-            header: "Time Slot",
-            render: (schedule: RoomScheduleResponse) =>
-              `${schedule.startTime} - ${schedule.endTime}`,
-          },
-          {
-            header: "Actions",
-            render: (schedule: RoomScheduleResponse) => (
-              <div className="flex flex-wrap justify-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => openEditDialog(schedule)}
-                >
-                  <Edit3 className="mr-2 h-4 w-4" /> Edit
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => openDeleteDialog(schedule)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </div>
-            ),
-          },
-        ]}
-        data={schedules}
+        columns={columns}
+        data={filteredSchedules}
         pageable={true}
         pageSize={10}
+        showActions={false}
         emptyMessage="No schedules found"
       />
 
@@ -332,8 +460,8 @@ export default function AdminRoomSchedulePage() {
               </SelectTrigger>
               <SelectContent>
                 {doctors.map((doctor) => (
-                  <SelectItem key={doctor.id} value={String(doctor.id)}>
-                    {doctor.name}
+                  <SelectItem key={doctor.userId} value={String(doctor.userId)}>
+                    {getDoctorDisplayName(doctor)}
                   </SelectItem>
                 ))}
               </SelectContent>
