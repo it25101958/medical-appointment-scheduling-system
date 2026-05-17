@@ -1,13 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Edit3, Eye, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Badge, Button, DataTable, type Column } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  DataTable,
+  type Column,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { highlightText } from "@/lib/highlight-search";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +58,10 @@ function getStatusBadgeClasses(isActive: boolean) {
     : "border-slate-200 bg-slate-50 text-slate-700";
 }
 
+function normalize(value: string) {
+  return value.trim().toLowerCase();
+}
+
 interface LabTestManagementProps {
   title: string;
   description: string;
@@ -66,12 +80,33 @@ export function LabTestManagement({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [filter, setFilter] = useState<LabTestFilter>(defaultFilter);
+  const [searchQuery, setSearchQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedLabTest, setSelectedLabTest] = useState<LabTest | null>(null);
   const [formValues, setFormValues] =
     useState<LabTestPayload>(createEmptyForm());
+
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+
+  const filteredLabTests = useMemo(() => {
+    const query = normalize(deferredSearchQuery);
+    if (!query) return labTests;
+    return labTests.filter((labTest) => {
+      const haystack = [
+        labTest.id?.toString(),
+        labTest.testName,
+        labTest.category,
+        labTest.description,
+        labTest.standardPrice?.toString(),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [deferredSearchQuery, labTests]);
 
   useEffect(() => {
     fetchLabTests(filter);
@@ -192,24 +227,27 @@ export function LabTestManagement({
     () => [
       {
         header: "ID",
-        accessor: "id",
+        render: (labTest) =>
+          highlightText(labTest.id?.toString() || "", deferredSearchQuery),
         className: "w-[90px] px-5 py-4 font-semibold text-foreground",
       },
       {
         header: "Test Name",
-        accessor: "testName",
+        render: (labTest) =>
+          highlightText(labTest.testName || "", deferredSearchQuery),
         className: "w-[220px] px-5 py-4 font-medium text-foreground",
       },
       {
         header: "Category",
-        accessor: "category",
+        render: (labTest) =>
+          highlightText(labTest.category || "", deferredSearchQuery),
         className: "w-[180px] px-5 py-4 text-muted-foreground",
       },
       {
         header: "Description",
         render: (labTest) => (
           <div className="max-w-[520px] whitespace-normal text-sm text-muted-foreground">
-            {labTest.description}
+            {highlightText(labTest.description || "", deferredSearchQuery)}
           </div>
         ),
         className: "w-[460px] px-5 py-4 align-top",
@@ -281,7 +319,7 @@ export function LabTestManagement({
         className: "w-[180px] px-5 py-4 text-center",
       },
     ],
-    [canManage],
+    [canManage, deferredSearchQuery],
   );
 
   const filterButtons: Array<{ value: LabTestFilter; label: string }> = [
@@ -306,6 +344,28 @@ export function LabTestManagement({
             : undefined
         }
       />
+
+      <Card className="border-border/60 bg-card/80 backdrop-blur">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold">
+            Search lab tests
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px] md:items-end">
+          <div className="grid gap-2">
+            <Label htmlFor="labtest-search">Quick search</Label>
+            <Input
+              id="labtest-search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search by name, category, or price"
+            />
+          </div>
+          <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+            {filteredLabTests.length} of {labTests.length} tests shown
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex flex-wrap gap-2">
         {filterButtons.map((button) => (
@@ -332,7 +392,7 @@ export function LabTestManagement({
         ) : (
           <DataTable
             columns={columns}
-            data={labTests}
+            data={filteredLabTests}
             pageable={true}
             pageSize={10}
             showActions={false}
