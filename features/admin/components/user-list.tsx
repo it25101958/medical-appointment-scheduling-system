@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { highlightText } from "@/lib/highlight-search";
 
 export interface User {
   userId: number;
@@ -23,6 +24,7 @@ export interface User {
 
 interface UserTableProps {
   users: User[];
+  searchQuery?: string;
   onToggleActive: (userId: number, active: boolean) => void;
   onEditRole?: (user: User) => void;
   onViewUserDetails?: (userId: number) => void;
@@ -32,6 +34,7 @@ const SYSTEM_ADMIN_ID = 1;
 
 export function UserTable({
   users,
+  searchQuery = "",
   onToggleActive,
   onEditRole,
   onViewUserDetails,
@@ -78,7 +81,7 @@ export function UserTable({
               return (
                 <TableRow key={user.userId} className="hover:bg-muted/20">
                   <TableCell className="px-4 py-2 font-medium text-muted-foreground">
-                    {user.userId}
+                    {highlightText(user.userId.toString(), searchQuery)}
                   </TableCell>
 
                   <TableCell className="px-4 py-2">
@@ -86,17 +89,20 @@ export function UserTable({
                       className="text-sm font-medium text-foreground hover:text-primary hover:underline cursor-pointer"
                       onClick={() => onViewUserDetails?.(user.userId)}
                     >
-                      {user.firstName} {user.lastName}
+                      {highlightText(
+                        `${user.firstName} ${user.lastName}`,
+                        searchQuery,
+                      )}
                     </span>
                   </TableCell>
 
                   <TableCell className="px-4 py-2 text-sm text-muted-foreground">
-                    {user.email}
+                    {highlightText(user.email, searchQuery)}
                   </TableCell>
 
                   <TableCell className="px-4 py-2">
                     <span className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                      {user.roleName}
+                      {highlightText(user.roleName, searchQuery)}
                     </span>
                   </TableCell>
 
