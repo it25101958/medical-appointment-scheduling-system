@@ -162,12 +162,12 @@ const NavigationContainer = () => {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
-          <Link href="/portal" passHref>
+          <Link href="/patient/login" passHref>
             <Button
               variant="outline"
               className="hidden sm:inline-flex font-medium"
             >
-              Login
+              Patient Login
             </Button>
           </Link>
           <ThemeToggle />
@@ -198,10 +198,10 @@ const NavigationContainer = () => {
             <div className="px-6 flex flex-col gap-6">
               <nav className="flex flex-col gap-2">
                 <Link
-                  href="/portal"
+                  href="/patient/login"
                   className="p-3 text-sm font-medium hover:bg-muted rounded-xl transition-colors text-primary"
                 >
-                  Login
+                  Patient Login
                 </Link>
                 <Link
                   href="/doctors"
