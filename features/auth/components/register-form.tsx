@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/input-group";
 import { formatValidationErrors } from "@/lib/utils";
 import { patientRegisterFormSchema } from "@/lib/validations/auth";
+import { registerAction } from "@/lib/actions/register-action";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -29,36 +30,31 @@ export function RegisterForm() {
       dateOfBirth: "",
       gender: "MALE",
       address: "",
+      emergencyContact: "",
+      bloodGroup: "O_POSITIVE",
+      allergies: "",
     },
     validators: {
       onSubmit: patientRegisterFormSchema,
     },
     onSubmit: async ({ value }) => {
       try {
-        const result = await registerAction({
-          ...value,
-          role: "patient",
-        });
+        const result = await registerAction(value);
 
         if (result.success) {
           toast.success("Registration successful!", {
             description: "Check your email for the verification code.",
           });
+
           setTimeout(() => {
             router.push(
               `/auth/verify?email=${encodeURIComponent(value.email)}`,
             );
           }, 1000);
         } else {
-          if (result.validation?.length) {
-            toast.error("Registration failed", {
-              description: result.error || "Please fix the highlighted fields",
-            });
-          } else {
-            toast.error("Registration failed", {
-              description: result.error || "Please try again",
-            });
-          }
+          toast.error("Registration failed", {
+            description: result.error || "Please try again",
+          });
         }
       } catch {
         toast.error("An error occurred", {
