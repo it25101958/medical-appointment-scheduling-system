@@ -162,14 +162,14 @@ const NavigationContainer = () => {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
-          {/* <Link href="/auth/login" passHref>
+          <Link href="/portal" passHref>
             <Button
               variant="outline"
               className="hidden sm:inline-flex font-medium"
             >
               Login
             </Button>
-          </Link> */}
+          </Link>
           <ThemeToggle />
           <Link href="/payment/online-payment" passHref>
             <Button
@@ -179,7 +179,6 @@ const NavigationContainer = () => {
               Online Payment
             </Button>
           </Link>
-          {/* <Button className="font-medium">Register</Button> */}
         </div>
       </div>
       <div className="flex items-center md:hidden">
@@ -198,6 +197,12 @@ const NavigationContainer = () => {
             </SheetHeader>
             <div className="px-6 flex flex-col gap-6">
               <nav className="flex flex-col gap-2">
+                <Link
+                  href="/portal"
+                  className="p-3 text-sm font-medium hover:bg-muted rounded-xl transition-colors text-primary"
+                >
+                  Login
+                </Link>
                 <Link
                   href="/doctors"
                   className="p-3 text-sm font-medium hover:bg-muted rounded-xl transition-colors"
