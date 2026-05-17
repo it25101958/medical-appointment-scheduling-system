@@ -5,7 +5,12 @@ const BASE_URL = process.env.INTERNAL_BACKEND_URL;
 
 export async function apiRequest<T = unknown>(
   endpoint: string,
-  options: RequestInit = {},
+  options: RequestInit & {
+    next?: {
+      revalidate?: number;
+      tags?: string[];
+    };
+  } = {},
 ): Promise<T> {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
