@@ -7,7 +7,7 @@ import {
   ClipboardList,
   CreditCard,
   History,
-  UserCircle,
+  MessageSquare,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -45,10 +45,10 @@ export default function PatientDashboard() {
       action: () => router.push("/patient/history"),
     },
     {
-      icon: UserCircle,
-      title: "Profile Settings",
-      buttonText: "Update Info",
-      action: () => router.push("/patient/profile"),
+      icon: MessageSquare,
+      title: "Feedback",
+      buttonText: "Share Feedback",
+      action: () => router.push("/patient/feedback"),
     },
   ];
 
@@ -68,7 +68,7 @@ export default function PatientDashboard() {
       }}
       secondaryButton={{
         text: "View My Visits",
-        onClick: () => router.push("/patient/appointments"),
+        onClick: () => router.push("/patient/feedback"),
       }}
       bentoItems={patientItems}
     />
