@@ -9,8 +9,6 @@ import {
 } from "react";
 import {
   Button,
-  Input,
-  Label,
   StyledDialog,
   Select,
   SelectTrigger,
@@ -21,10 +19,10 @@ import {
   PopoverContent,
   PopoverTrigger,
   DataTable,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+  PageHeader,
+  SearchBar,
+  Label,
+  Input,
 } from "@/components/ui";
 import type { Column } from "@/components/ui";
 import { PaginationControls } from "@/features/admin/components/pagination-controls";
@@ -360,44 +358,29 @@ export default function AdminRoomSchedulePage() {
 
   return (
     <div className="col-start-1 col-end-14">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Manage Room Schedules</h1>
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Assign doctors to rooms for specific time slots across the week.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={() => fetchData()} size="sm" variant="outline">
-            <RefreshCcw className="h-4 w-4" /> Refresh
-          </Button>
-          <Button onClick={openCreateDialog} size="sm">
-            <Plus className="h-4 w-4" /> New Schedule
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Manage Room Schedules"
+        description="Assign doctors to rooms for specific time slots across the week."
+        actions={
+          <>
+            <Button onClick={() => fetchData()} size="sm" variant="outline">
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            <Button onClick={openCreateDialog} size="sm">
+              <Plus className="h-4 w-4" /> New Schedule
+            </Button>
+          </>
+        }
+      />
 
-      <Card className="border-border/60 bg-card/80 backdrop-blur mb-6">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">
-            Search schedules
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
-          <div className="grid gap-2">
-            <Label htmlFor="schedule-search">Quick search</Label>
-            <Input
-              id="schedule-search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search by room, doctor, day, or time"
-            />
-          </div>
-          <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            {filteredSchedules.length} of {schedules.length} schedules shown
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mb-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by room, doctor, day, or time"
+          resultCount={filteredSchedules.length}
+        />
+      </div>
 
       <div className="overflow-hidden w-auto rounded-lg border border-border bg-card">
         <DataTable

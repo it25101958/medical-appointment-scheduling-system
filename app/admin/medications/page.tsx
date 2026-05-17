@@ -14,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -31,7 +30,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CrudActionButton } from "@/features/shared/components/crud-action-button";
-import { CrudPageHeader } from "@/features/shared/components/crud-page-header";
+import { PageHeader } from "@/components/ui/page-header";
+import { SearchBar } from "@/components/ui/search-bar";
+import { RefreshCcw } from "lucide-react";
 import { DeleteConfirmDialog } from "@/features/shared/components/delete-confirm-dialog";
 import { PaginationControls } from "@/features/admin/components/pagination-controls";
 import {
@@ -46,6 +47,7 @@ import { getErrorMessage } from "@/lib/utils";
 import { Edit3, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { highlightText } from "@/lib/highlight-search";
+import { Label } from "@/components/ui";
 
 const MEDICATION_STATUS_OPTIONS = [
   "AVAILABLE",
@@ -300,199 +302,181 @@ export default function AdminMedicationsPage() {
 
   return (
     <div className="col-start-1 col-end-14">
-      <div className="relative overflow-hidden rounded-[32px] border border-border/60 bg-gradient-to-br from-primary/10 via-background to-background shadow-sm">
-        <div className="pointer-events-none absolute -right-24 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute -left-24 bottom-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+      <PageHeader
+        title="Medication Inventory"
+        description="Create, update, search, and remove medication records with cache-backed refreshes and fast local filtering."
+        actions={
+          <>
+            <Button onClick={fetchMedications} size="sm" variant="outline">
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={openCreateDialog}
+              size="sm"
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              New Medication
+            </Button>
+          </>
+        }
+      />
 
-        <div className="relative space-y-6 p-6 md:p-8">
-          <CrudPageHeader
-            title="Medication Inventory"
-            description="Create, update, search, and remove medication records with cache-backed refreshes and fast local filtering."
-            onRefresh={fetchMedications}
-            createAction={{
-              label: "New Medication",
-              icon: <Plus className="h-4 w-4" />,
-              onClick: openCreateDialog,
-            }}
-          />
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {summaryCards.map((card) => (
-              <Card
-                key={card.title}
-                className="border-border/60 bg-card/80 backdrop-blur"
-              >
-                <CardHeader className="space-y-2 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {card.title}
-                  </CardTitle>
-                  <div className="text-3xl font-semibold tracking-tight text-foreground">
-                    {card.value}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0 text-sm text-muted-foreground">
-                  {card.note}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <Card className="border-border/60 bg-card/80 backdrop-blur">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">
-                Search inventory
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
+        {summaryCards.map((card) => (
+          <Card
+            key={card.title}
+            className="border-border/60 bg-card/80 backdrop-blur"
+          >
+            <CardHeader className="space-y-2 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {card.title}
               </CardTitle>
+              <div className="text-3xl font-semibold tracking-tight text-foreground">
+                {card.value}
+              </div>
             </CardHeader>
-            <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
-              <div className="grid gap-2">
-                <Label htmlFor="medication-search">Quick search</Label>
-                <Input
-                  id="medication-search"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search by name, generic name, dosage, form, manufacturer, or status"
-                />
-              </div>
-              <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-                {filteredMedications.length} of {medications.length} records
-                shown
-              </div>
+            <CardContent className="pt-0 text-sm text-muted-foreground">
+              {card.note}
             </CardContent>
           </Card>
+        ))}
+      </div>
 
-          <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm">
-            {loading ? (
-              <div className="px-6 py-10 text-center text-sm text-muted-foreground">
-                Loading medications...
-              </div>
-            ) : filteredMedications.length === 0 ? (
-              <div className="px-6 py-10 text-center text-sm text-muted-foreground">
-                No medications match your search.
-              </div>
-            ) : (
-              <>
-                <ScrollArea className="max-h-[620px] w-full">
-                  <Table className="min-w-[1180px]">
-                    <TableHeader>
-                      <TableRow className="bg-muted/45 hover:bg-muted/45">
-                        <TableHead className="w-[90px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          ID
-                        </TableHead>
-                        <TableHead className="w-[200px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Name
-                        </TableHead>
-                        <TableHead className="w-[200px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Generic
-                        </TableHead>
-                        <TableHead className="w-[200px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Manufacturer
-                        </TableHead>
-                        <TableHead className="w-[150px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Dosage
-                        </TableHead>
-                        <TableHead className="w-[150px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Form
-                        </TableHead>
-                        <TableHead className="w-[160px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Status
-                        </TableHead>
-                        <TableHead className="w-[180px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Updated
-                        </TableHead>
-                        <TableHead className="w-[150px] px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Actions
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
+      <div className="mb-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by name, generic name, dosage, form, manufacturer, or status"
+          resultCount={filteredMedications.length}
+        />
+      </div>
 
-                    <TableBody>
-                      {paginatedMedications.map((medication) => (
-                        <TableRow
-                          key={medication.medicationId}
-                          className="group transition-colors hover:bg-muted/25"
-                        >
-                          <TableCell className="w-[90px] px-5 py-4 font-semibold text-foreground">
-                            {medication.medicationId}
-                          </TableCell>
-                          <TableCell className="w-[200px] px-5 py-4 font-medium text-foreground">
-                            {highlightText(
-                              medication.name,
-                              deferredSearchQuery,
-                            )}
-                          </TableCell>
-                          <TableCell className="w-[200px] px-5 py-4 text-muted-foreground">
-                            {highlightText(
-                              medication.genericName,
-                              deferredSearchQuery,
-                            )}
-                          </TableCell>
-                          <TableCell className="w-[200px] px-5 py-4 text-muted-foreground">
-                            {highlightText(
-                              medication.manufacturer,
-                              deferredSearchQuery,
-                            )}
-                          </TableCell>
-                          <TableCell className="w-[150px] px-5 py-4 text-muted-foreground">
-                            {highlightText(
-                              medication.dosage,
-                              deferredSearchQuery,
-                            )}
-                          </TableCell>
-                          <TableCell className="w-[150px] px-5 py-4 text-muted-foreground">
-                            {highlightText(
-                              medication.dosageForm,
-                              deferredSearchQuery,
-                            )}
-                          </TableCell>
-                          <TableCell className="w-[160px] px-5 py-4">
-                            <Badge
-                              variant="outline"
-                              className={`rounded-full px-3 py-0.5 uppercase tracking-wide ${getStatusBadgeClasses(medication.status)}`}
-                            >
-                              {medication.status || "—"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="w-[180px] px-5 py-4 text-sm text-muted-foreground">
-                            {formatDate(
-                              medication.updatedAt || medication.createdAt,
-                            )}
-                          </TableCell>
-                          <TableCell className="w-[150px] px-5 py-4 text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <CrudActionButton
-                                label="Edit medication"
-                                icon={<Edit3 className="size-4" />}
-                                onClick={() => openEditDialog(medication)}
-                              />
-                              <CrudActionButton
-                                label="Delete medication"
-                                icon={<Trash2 className="size-4" />}
-                                destructive
-                                onClick={() => openDeleteDialog(medication)}
-                              />
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-
-                <PaginationControls
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  pageSize={pageSize}
-                  pageSizeOptions={[5, 8, 10, 20]}
-                  onPageChange={setCurrentPage}
-                  onPageSizeChange={(size) => {
-                    setPageSize(size);
-                    setCurrentPage(0);
-                  }}
-                />
-              </>
-            )}
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
+        {loading ? (
+          <div className="px-6 py-10 text-center text-sm text-muted-foreground">
+            Loading medications...
           </div>
-        </div>
+        ) : filteredMedications.length === 0 ? (
+          <div className="px-6 py-10 text-center text-sm text-muted-foreground">
+            No medications match your search.
+          </div>
+        ) : (
+          <>
+            <ScrollArea className="max-h-[620px] w-full">
+              <Table className="min-w-[1180px]">
+                <TableHeader>
+                  <TableRow className="bg-muted/45 hover:bg-muted/45">
+                    <TableHead className="w-[90px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      ID
+                    </TableHead>
+                    <TableHead className="w-[200px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Name
+                    </TableHead>
+                    <TableHead className="w-[200px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Generic
+                    </TableHead>
+                    <TableHead className="w-[200px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Manufacturer
+                    </TableHead>
+                    <TableHead className="w-[150px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Dosage
+                    </TableHead>
+                    <TableHead className="w-[150px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Form
+                    </TableHead>
+                    <TableHead className="w-[160px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Status
+                    </TableHead>
+                    <TableHead className="w-[180px] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Updated
+                    </TableHead>
+                    <TableHead className="w-[150px] px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {paginatedMedications.map((medication) => (
+                    <TableRow
+                      key={medication.medicationId}
+                      className="group transition-colors hover:bg-muted/25"
+                    >
+                      <TableCell className="w-[90px] px-5 py-4 font-semibold text-foreground">
+                        {medication.medicationId}
+                      </TableCell>
+                      <TableCell className="w-[200px] px-5 py-4 font-medium text-foreground">
+                        {highlightText(medication.name, deferredSearchQuery)}
+                      </TableCell>
+                      <TableCell className="w-[200px] px-5 py-4 text-muted-foreground">
+                        {highlightText(
+                          medication.genericName,
+                          deferredSearchQuery,
+                        )}
+                      </TableCell>
+                      <TableCell className="w-[200px] px-5 py-4 text-muted-foreground">
+                        {highlightText(
+                          medication.manufacturer,
+                          deferredSearchQuery,
+                        )}
+                      </TableCell>
+                      <TableCell className="w-[150px] px-5 py-4 text-muted-foreground">
+                        {highlightText(medication.dosage, deferredSearchQuery)}
+                      </TableCell>
+                      <TableCell className="w-[150px] px-5 py-4 text-muted-foreground">
+                        {highlightText(
+                          medication.dosageForm,
+                          deferredSearchQuery,
+                        )}
+                      </TableCell>
+                      <TableCell className="w-[160px] px-5 py-4">
+                        <Badge
+                          variant="outline"
+                          className={`rounded-full px-3 py-0.5 uppercase tracking-wide ${getStatusBadgeClasses(medication.status)}`}
+                        >
+                          {medication.status || "—"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="w-[180px] px-5 py-4 text-sm text-muted-foreground">
+                        {formatDate(
+                          medication.updatedAt || medication.createdAt,
+                        )}
+                      </TableCell>
+                      <TableCell className="w-[150px] px-5 py-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <CrudActionButton
+                            label="Edit medication"
+                            icon={<Edit3 className="size-4" />}
+                            onClick={() => openEditDialog(medication)}
+                          />
+                          <CrudActionButton
+                            label="Delete medication"
+                            icon={<Trash2 className="size-4" />}
+                            destructive
+                            onClick={() => openDeleteDialog(medication)}
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              pageSizeOptions={[5, 8, 10, 20]}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setCurrentPage(0);
+              }}
+            />
+          </>
+        )}
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

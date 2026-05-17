@@ -1,5 +1,6 @@
 import { apiRequest } from "@/lib/api-client";
 import { PrescriptionList, PaginationControls } from "@/features/admin";
+import { PageHeader } from "@/components/ui/page-header";
 
 interface PrescriptionListItem {
   prescriptionId: number;
@@ -32,10 +33,10 @@ export default async function AdminPrescriptionsPage({
 
   return (
     <div className="space-y-6 col-span-1 col-span-13">
-      <div className="flex flex-col space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Prescriptions</h1>
-        <p className="text-muted-foreground">Managing medical records</p>
-      </div>
+      <PageHeader
+        title="Prescriptions"
+        description="Managing medical records"
+      />
 
       <div className="rounded-3xl border border-border/60 bg-card/50 overflow-hidden shadow-sm">
         <PrescriptionList data={data.content} />

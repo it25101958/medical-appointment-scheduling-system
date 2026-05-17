@@ -26,6 +26,8 @@ export { Input } from "./input";
 export { Label } from "./label";
 export { Button } from "./button";
 export { Textarea } from "./textarea";
+export { SearchBar } from "./search-bar";
+export { PageHeader } from "./page-header";
 export {
   Select,
   SelectGroup,

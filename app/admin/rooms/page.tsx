@@ -2,9 +2,11 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
+import { SearchBar } from "@/components/ui/search-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { highlightText } from "@/lib/highlight-search";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -173,44 +175,29 @@ export default function AdminRoomsPage() {
 
   return (
     <div className="col-start-1 col-end-14">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Manage Rooms</h1>
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Create, update, delete, and view all available room records.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={fetchRooms} size="sm" variant="outline">
-            <RefreshCcw className="h-4 w-4" />
-          </Button>
-          <Button onClick={openCreateDialog} size="sm">
-            <Plus className="h-4 w-4" /> New Room
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Manage Rooms"
+        description="Create, update, delete, and view all available room records."
+        actions={
+          <>
+            <Button onClick={fetchRooms} size="sm" variant="outline">
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            <Button onClick={openCreateDialog} size="sm">
+              <Plus className="h-4 w-4" /> New Room
+            </Button>
+          </>
+        }
+      />
 
-      <Card className="border-border/60 bg-card/80 backdrop-blur mb-6">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">
-            Search rooms
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px] md:items-end">
-          <div className="grid gap-2">
-            <Label htmlFor="room-search">Quick search</Label>
-            <Input
-              id="room-search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search by room number, type, equipment, or status"
-            />
-          </div>
-          <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            {filteredRooms.length} of {rooms.length} rooms shown
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mb-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by room number, type, equipment, or status"
+          resultCount={filteredRooms.length}
+        />
+      </div>
 
       <div className="overflow-hidden rounded-lg border border-border bg-card">
         <ScrollArea className="bg-card rounded-lg border-b border-border overflow-x-auto">

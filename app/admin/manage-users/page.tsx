@@ -11,9 +11,8 @@ import {
 import { apiRequest } from "@/lib/api-client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { SearchBar } from "@/components/ui/search-bar";
+import { PageHeader } from "@/components/ui/page-header";
 import { motion, AnimatePresence } from "framer-motion";
 import { RefreshCcw, Plus } from "lucide-react";
 import {
@@ -225,56 +224,42 @@ export default function ManageUsersPage() {
 
   return (
     <div className="col-start-1 col-end-14 ">
-      <h1 className="text-2xl font-medium mb-2">Manage Users</h1>
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">
-          View users, activate or deactivate accounts, and update user roles.
-        </p>
+      <PageHeader
+        title="Manage Users"
+        description="View users, activate or deactivate accounts, and update user roles."
+        actions={
+          <>
+            <Button onClick={fetchUsers} size="sm" variant="outline">
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={() => setRegisterDialogOpen(true)}
+              size="sm"
+              className="bg-primary hover:bg-primary/90"
+              disabled={currentUser?.roleType !== 1}
+              title={
+                currentUser?.roleType !== 1
+                  ? "Only administrators can add users"
+                  : undefined
+              }
+            >
+              <Plus className="h-4 w-4" />
+              Add User
+            </Button>
+          </>
+        }
+      />
 
-        <div className="flex gap-2">
-          <Button onClick={fetchUsers} size="sm" variant="outline">
-            <RefreshCcw className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={() => setRegisterDialogOpen(true)}
-            size="sm"
-            className="bg-primary hover:bg-primary/90"
-            disabled={currentUser?.roleType !== 1}
-            title={
-              currentUser?.roleType !== 1
-                ? "Only administrators can add users"
-                : undefined
-            }
-          >
-            <Plus className="h-4 w-4" />
-            Add User
-          </Button>
-        </div>
+      <div className="mb-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by ID, name, email, or role"
+          resultCount={filteredUsers.length}
+        />
       </div>
 
-      <Card className="border-border/60 bg-card/80 backdrop-blur">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">
-            Search users
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px] md:items-end">
-          <div className="grid gap-2">
-            <Label htmlFor="user-search">Quick search</Label>
-            <Input
-              id="user-search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search by ID, name, email, or role"
-            />
-          </div>
-          <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            {filteredUsers.length} of {users.length} users shown
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="overflow-hidden w-auto rounded-lg border border-border bg-card">
+      <div className="overflow-hidden w-auto rounded-lg border border-border bg-card mb-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentPage} // triggers animation when page changes
