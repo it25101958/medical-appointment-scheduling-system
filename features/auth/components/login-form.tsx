@@ -16,7 +16,20 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 
-export function LoginForm() {
+type LoginAudience = "patient" | "portal";
+
+interface LoginFormProps {
+  audience?: LoginAudience;
+}
+
+const roleRedirects: Record<number, string> = {
+  1: "/admin/dashboard",
+  2: "/staff/dashboard",
+  3: "/doctor/dashboard",
+  4: "/patient/dashboard",
+};
+
+export function LoginForm({ audience = "portal" }: LoginFormProps) {
   const router = useRouter();
   const form = useForm({
     defaultValues: { email: "", password: "" },
@@ -24,17 +37,10 @@ export function LoginForm() {
       onSubmit: loginSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await loginAction(value);
+      const result = await loginAction(value, audience);
 
       if (result.success) {
-        const redirects: Record<number, string> = {
-          1: "/admin/dashboard",
-          2: "/staff/dashboard",
-          3: "/doctor/dashboard",
-          4: "/patient/dashboard",
-        };
-
-        const target = redirects[result.role as number] || "/patient/dashboard";
+        const target = roleRedirects[result.role as number] || "/portal";
         router.push(target);
         router.refresh();
       } else {
@@ -115,21 +121,32 @@ export function LoginForm() {
       </div>
 
       <form.Subscribe
-        selector={(state) => [state.canSubmit, state.isSubmitting]}
+        selector={(state) => [
+          state.values.email,
+          state.values.password,
+          state.canSubmit,
+          state.isSubmitting,
+        ]}
       >
-        {([canSubmit, isSubmitting]) => (
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={!canSubmit || isSubmitting}
-          >
-            {isSubmitting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              "Sign In"
-            )}
-          </Button>
-        )}
+        {([email, password, canSubmit, isSubmitting]) => {
+          if (!String(email).trim() || !String(password).trim()) {
+            return null;
+          }
+
+          return (
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={!Boolean(canSubmit) || Boolean(isSubmitting)}
+            >
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          );
+        }}
       </form.Subscribe>
     </form>
   );
