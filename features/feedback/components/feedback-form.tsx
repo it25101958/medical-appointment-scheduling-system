@@ -4,7 +4,7 @@ import { useForm } from "@tanstack/react-form";
 import { Loader2, Send, Star } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Card, CardContent, Input, Label, Textarea } from "@/components/ui";
+import { Button, Input, Label, Textarea } from "@/components/ui";
 import { formatValidationErrors, getErrorMessage } from "@/lib/utils";
 import { feedbackApi } from "../api/feedback.api";
 import {
@@ -57,8 +57,14 @@ export function FeedbackForm({ patientId, onCreated }: FeedbackFormProps) {
   });
 
   return (
-    <Card className="border-border/60 bg-card/80">
-      <CardContent className="p-6">
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="border-b border-border/60 bg-muted/30 px-6 py-4">
+        <h2 className="text-base font-semibold">Create Feedback</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Add your appointment ID, doctor ID, rating, and comments.
+        </p>
+      </div>
+      <div className="p-6">
         <form
           className="space-y-5"
           onSubmit={(event) => {
@@ -74,7 +80,9 @@ export function FeedbackForm({ patientId, onCreated }: FeedbackFormProps) {
             >
               {(field) => (
                 <div className="grid gap-2">
-                  <Label htmlFor={field.name}>Appointment ID *</Label>
+                  <Label className="form-label mb-0" htmlFor={field.name}>
+                    Appointment ID *
+                  </Label>
                   <Input
                     id={field.name}
                     min={1}
@@ -101,7 +109,9 @@ export function FeedbackForm({ patientId, onCreated }: FeedbackFormProps) {
             >
               {(field) => (
                 <div className="grid gap-2">
-                  <Label htmlFor={field.name}>Doctor ID *</Label>
+                  <Label className="form-label mb-0" htmlFor={field.name}>
+                    Doctor ID *
+                  </Label>
                   <Input
                     id={field.name}
                     min={1}
@@ -135,7 +145,7 @@ export function FeedbackForm({ patientId, onCreated }: FeedbackFormProps) {
           >
             {(field) => (
               <div className="grid gap-3">
-                <Label>Rating *</Label>
+                <Label className="form-label mb-0">Rating *</Label>
                 <div className="flex flex-wrap gap-2">
                   {[1, 2, 3, 4, 5].map((rating) => (
                     <Button
@@ -171,7 +181,9 @@ export function FeedbackForm({ patientId, onCreated }: FeedbackFormProps) {
           >
             {(field) => (
               <div className="grid gap-2">
-                <Label htmlFor={field.name}>Comments</Label>
+                <Label className="form-label mb-0" htmlFor={field.name}>
+                  Comments
+                </Label>
                 <Textarea
                   id={field.name}
                   maxLength={255}
@@ -237,7 +249,7 @@ export function FeedbackForm({ patientId, onCreated }: FeedbackFormProps) {
             }}
           </form.Subscribe>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

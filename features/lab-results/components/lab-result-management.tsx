@@ -7,6 +7,7 @@ import {
   Eye,
   FilePlus,
   FlaskConical,
+  Hash,
   Plus,
   Search,
 } from "lucide-react";
@@ -15,12 +16,9 @@ import { toast } from "sonner";
 import {
   Badge,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -32,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
+  PageHeader,
 } from "@/components/ui";
 import { getErrorMessage } from "@/lib/utils";
 import { labResultApi } from "../api/lab-result.api";
@@ -47,7 +46,6 @@ function createEmptyForm(): LabResultValues {
   return {
     appointmentId: 0,
     patientId: 0,
-    labTestId: 0,
     testName: "",
     resultValue: "",
     referenceRange: "",
@@ -139,7 +137,6 @@ export function LabResultManagement({
     setFormValues({
       appointmentId: result.appointmentId,
       patientId: result.patientId,
-      labTestId: 0,
       testName: result.testName || "",
       resultValue: result.resultValue || "",
       referenceRange: result.referenceRange || "",
@@ -194,43 +191,52 @@ export function LabResultManagement({
 
   return (
     <div className="col-start-1 col-end-14 space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-border/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-            <FlaskConical className="h-3.5 w-3.5" />
-            Laboratory results
+      <PageHeader
+        title={title}
+        description={description}
+        actions={
+          canManage ? (
+            <Button size="sm" onClick={openCreateDialog}>
+              <Plus className="h-4 w-4" />
+              New Result
+            </Button>
+          ) : undefined
+        }
+      />
+
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <Search className="size-4" />
           </div>
-          <h1 className="text-2xl font-semibold">{title}</h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            {description}
-          </p>
+          <div>
+            <p className="text-sm font-medium leading-none">
+              Search patient results
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Enter a patient ID to load lab results from
+              <span className="font-medium"> /lab-results/patient/:id</span>.
+            </p>
+          </div>
         </div>
 
-        {canManage && (
-          <Button size="sm" onClick={openCreateDialog}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Result
-          </Button>
-        )}
-      </div>
-
-      <Card className="border-border/60 bg-card/80">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">
-            Search patient results
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-[220px_auto] md:items-end">
+        <div className="grid gap-3 md:grid-cols-[220px_auto] md:items-end">
           <div className="grid gap-2">
-            <Label htmlFor="patient-search">Patient ID</Label>
+            <Label className="form-label mb-0" htmlFor="patient-search">
+              Patient ID
+            </Label>
+            <div className="relative">
+              <Hash className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="patient-search"
               type="number"
               min={1}
+              className="pl-9"
               value={patientIdFilter}
               onChange={(event) => setPatientIdFilter(event.target.value)}
               placeholder="Enter patient ID"
             />
+            </div>
           </div>
           {patientIdFilter.trim() && (
             <Button onClick={searchByPatient} disabled={loading}>
@@ -238,26 +244,24 @@ export function LabResultManagement({
               {loading ? "Searching..." : "Search"}
             </Button>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="grid gap-4">
         {loading ? (
-          <Card className="border-border/60 bg-card/80">
-            <CardContent className="p-6 text-sm text-muted-foreground">
+          <div className="rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground">
               Loading lab results...
-            </CardContent>
-          </Card>
+          </div>
         ) : sortedResults.length === 0 ? (
-          <Card className="border-border/60 bg-card/80">
-            <CardContent className="p-6 text-sm text-muted-foreground">
+          <div className="rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground">
               Search by patient ID to view lab results.
-            </CardContent>
-          </Card>
+          </div>
         ) : (
           sortedResults.map((result) => (
-            <Card key={result.id} className="border-border/60 bg-card/80">
-              <CardContent className="p-5">
+            <div
+              key={result.id}
+              className="rounded-lg border border-border bg-card p-5"
+            >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
@@ -286,53 +290,79 @@ export function LabResultManagement({
 
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      size="sm"
+                      size="icon-sm"
                       variant="outline"
                       onClick={() => openDetailsDialog(result)}
+                      aria-label="View lab result"
+                      title="View"
                     >
-                      <Eye className="mr-2 h-4 w-4" />
-                      View
+                      <Eye className="h-4 w-4" />
                     </Button>
                     {canManage && (
                       <>
                         <Button
-                          size="sm"
+                          size="icon-sm"
                           variant="outline"
                           onClick={() => openEditDialog(result)}
+                          aria-label="Edit lab result"
+                          title="Edit"
                         >
-                          <Edit3 className="mr-2 h-4 w-4" />
-                          Edit
+                          <Edit3 className="h-4 w-4" />
                         </Button>
                         <Button
-                          size="sm"
+                          size="icon-sm"
                           variant="outline"
                           disabled
                           title="The backend does not expose DELETE /lab-results/{id}."
+                          aria-label="Delete unavailable"
                         >
-                          <AlertCircle className="mr-2 h-4 w-4" />
-                          Delete unavailable
+                          <AlertCircle className="h-4 w-4" />
                         </Button>
                       </>
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+            </div>
           ))
         )}
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[820px]">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[820px]">
           <DialogHeader>
-            <DialogTitle>
-              {selectedResult ? "Edit Lab Result" : "Create Lab Result"}
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <FlaskConical className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    {selectedResult ? "Edit Lab Result" : "Create Lab Result"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Record patient lab result values for an appointment.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="grid gap-4 py-2 md:grid-cols-2">
+          <div className="space-y-5 px-6">
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+              <p className="text-sm font-medium leading-none">
+                Lab Result Details
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Your backend supports create, patient lookup, detail lookup, and
+                update. Delete is not available.
+              </p>
+            </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="appointment-id">Appointment ID *</Label>
+              <Label className="form-label mb-0" htmlFor="appointment-id">
+                Appointment ID *
+              </Label>
               <Input
                 id="appointment-id"
                 type="number"
@@ -348,7 +378,9 @@ export function LabResultManagement({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="patient-id">Patient ID *</Label>
+              <Label className="form-label mb-0" htmlFor="patient-id">
+                Patient ID *
+              </Label>
               <Input
                 id="patient-id"
                 type="number"
@@ -364,23 +396,7 @@ export function LabResultManagement({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="lab-test-id">Lab Test ID</Label>
-              <Input
-                id="lab-test-id"
-                type="number"
-                min={1}
-                value={formValues.labTestId || ""}
-                onChange={(event) =>
-                  setFormValues((current) => ({
-                    ...current,
-                    labTestId: Number(event.target.value),
-                  }))
-                }
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Status *</Label>
+              <Label className="form-label mb-0">Status *</Label>
               <Select
                 value={formValues.status}
                 onValueChange={(value) =>
@@ -390,7 +406,11 @@ export function LabResultManagement({
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  position="popper"
+                  align="start"
+                  className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+                >
                   {statusOptions.map((status) => (
                     <SelectItem key={status} value={status}>
                       {status}
@@ -401,7 +421,9 @@ export function LabResultManagement({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="test-name">Test Name *</Label>
+              <Label className="form-label mb-0" htmlFor="test-name">
+                Test Name *
+              </Label>
               <Input
                 id="test-name"
                 value={formValues.testName}
@@ -415,7 +437,9 @@ export function LabResultManagement({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="test-date">Test Date</Label>
+              <Label className="form-label mb-0" htmlFor="test-date">
+                Test Date
+              </Label>
               <Input
                 id="test-date"
                 type="date"
@@ -430,7 +454,9 @@ export function LabResultManagement({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="result-value">Result Value *</Label>
+              <Label className="form-label mb-0" htmlFor="result-value">
+                Result Value *
+              </Label>
               <Input
                 id="result-value"
                 value={formValues.resultValue}
@@ -444,7 +470,9 @@ export function LabResultManagement({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="reference-range">Reference Range *</Label>
+              <Label className="form-label mb-0" htmlFor="reference-range">
+                Reference Range *
+              </Label>
               <Input
                 id="reference-range"
                 value={formValues.referenceRange}
@@ -458,7 +486,9 @@ export function LabResultManagement({
             </div>
 
             <div className="grid gap-2 md:col-span-2">
-              <Label htmlFor="remarks">Remarks</Label>
+              <Label className="form-label mb-0" htmlFor="remarks">
+                Remarks
+              </Label>
               <Textarea
                 id="remarks"
                 value={formValues.remarks || ""}
@@ -472,8 +502,9 @@ export function LabResultManagement({
               />
             </div>
           </div>
+          </div>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button
               variant="outline"
               onClick={() => {
@@ -499,14 +530,28 @@ export function LabResultManagement({
       </Dialog>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="sm:max-w-[720px]">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[720px]">
           <DialogHeader>
-            <DialogTitle>Lab Result Details</DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Eye className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Lab Result Details
+                  </DialogTitle>
+                  <DialogDescription>
+                    Review patient lab result information.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
           {selectedResult && (
-            <div className="space-y-4">
-              <div className="rounded-md border border-border/60 bg-muted/30 p-4">
+            <div className="space-y-4 px-6 pb-6">
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-lg font-semibold">
                     {selectedResult.testName}
@@ -524,21 +569,21 @@ export function LabResultManagement({
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
-                <div className="rounded-md border border-border/60 p-3">
+                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">Reference</p>
                   <p className="font-medium">{selectedResult.referenceRange}</p>
                 </div>
-                <div className="rounded-md border border-border/60 p-3">
+                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">Appointment</p>
                   <p className="font-medium">
                     #{selectedResult.appointmentId}
                   </p>
                 </div>
-                <div className="rounded-md border border-border/60 p-3">
+                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">Patient</p>
                   <p className="font-medium">#{selectedResult.patientId}</p>
                 </div>
-                <div className="rounded-md border border-border/60 p-3">
+                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">Updated</p>
                   <p className="font-medium">
                     {selectedResult.updatedAt
@@ -549,7 +594,7 @@ export function LabResultManagement({
               </div>
 
               {selectedResult.remarks && (
-                <div className="rounded-md border border-border/60 p-3">
+                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">Remarks</p>
                   <p className="text-sm">{selectedResult.remarks}</p>
                 </div>

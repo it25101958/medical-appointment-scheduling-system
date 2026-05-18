@@ -10,6 +10,7 @@ import {
   CardTitle,
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -44,7 +45,7 @@ import {
   type MedicationPayload,
 } from "@/lib/services/medication-service";
 import { getErrorMessage } from "@/lib/utils";
-import { Edit3, Plus, Trash2 } from "lucide-react";
+import { Edit3, Pill, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { highlightText } from "@/lib/highlight-search";
 import { Label } from "@/components/ui";
@@ -480,16 +481,30 @@ export default function AdminMedicationsPage() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[760px]">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[760px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
-              {selectedMedication ? "Edit Medication" : "Create Medication"}
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Pill className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    {selectedMedication ? "Edit Medication" : "Create Medication"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Maintain medication inventory details and availability.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="grid gap-4 py-2 sm:grid-cols-2">
+          <div className="grid gap-4 px-6 sm:grid-cols-2">
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="medication-name">Medication Name</Label>
+              <Label className="form-label mb-0" htmlFor="medication-name">
+                Medication Name
+              </Label>
               <Input
                 id="medication-name"
                 value={formValues.name}
@@ -504,7 +519,12 @@ export default function AdminMedicationsPage() {
             </div>
 
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="medication-generic-name">Generic Name</Label>
+              <Label
+                className="form-label mb-0"
+                htmlFor="medication-generic-name"
+              >
+                Generic Name
+              </Label>
               <Input
                 id="medication-generic-name"
                 value={formValues.genericName}
@@ -519,7 +539,12 @@ export default function AdminMedicationsPage() {
             </div>
 
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="medication-manufacturer">Manufacturer</Label>
+              <Label
+                className="form-label mb-0"
+                htmlFor="medication-manufacturer"
+              >
+                Manufacturer
+              </Label>
               <Input
                 id="medication-manufacturer"
                 value={formValues.manufacturer}
@@ -534,7 +559,9 @@ export default function AdminMedicationsPage() {
             </div>
 
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="medication-dosage">Dosage</Label>
+              <Label className="form-label mb-0" htmlFor="medication-dosage">
+                Dosage
+              </Label>
               <Input
                 id="medication-dosage"
                 value={formValues.dosage}
@@ -549,7 +576,12 @@ export default function AdminMedicationsPage() {
             </div>
 
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="medication-dosage-form">Dosage Form</Label>
+              <Label
+                className="form-label mb-0"
+                htmlFor="medication-dosage-form"
+              >
+                Dosage Form
+              </Label>
               <Input
                 id="medication-dosage-form"
                 value={formValues.dosageForm}
@@ -564,7 +596,9 @@ export default function AdminMedicationsPage() {
             </div>
 
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="medication-status">Status</Label>
+              <Label className="form-label mb-0" htmlFor="medication-status">
+                Status
+              </Label>
               <Select
                 value={formValues.status}
                 onValueChange={(value) =>
@@ -577,7 +611,11 @@ export default function AdminMedicationsPage() {
                 <SelectTrigger id="medication-status">
                   <SelectValue placeholder="Select medication status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  position="popper"
+                  align="start"
+                  className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+                >
                   {MEDICATION_STATUS_OPTIONS.map((status) => (
                     <SelectItem key={status} value={status}>
                       {status}
@@ -588,7 +626,7 @@ export default function AdminMedicationsPage() {
             </div>
           </div>
 
-          <DialogFooter className="mt-4 gap-2">
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button
               variant="outline"
               onClick={() => {

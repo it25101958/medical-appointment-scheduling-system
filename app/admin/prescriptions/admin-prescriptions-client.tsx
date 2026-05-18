@@ -66,7 +66,7 @@ export function AdminPrescriptionsClient({
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <PrescriptionList data={filteredPrescriptions} />
+        <PrescriptionList data={filteredPrescriptions} showSearch={false} />
 
         <PaginationControls currentPage={currentPage} totalPages={totalPages} />
       </div>

@@ -1,26 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   MessageSquare,
   Plus,
-  Send,
   Star,
   Trash2,
   CalendarDays,
   Clock3,
   Eye,
   RefreshCcw,
-  Stethoscope,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
+  Badge,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+  DataTable,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,8 +30,12 @@ import {
   DialogHeader,
   DialogTitle,
   Label,
+  PageHeader,
+  SearchBar,
   Textarea,
+  type Column,
 } from "@/components/ui";
+import { PaginationControls } from "@/features/admin/components/pagination-controls";
 import { AppointmentDetailsDialog } from "@/features/appointments/components/appointment-details-dialog";
 import { AppointmentStatusBadge } from "@/features/appointments/components/appointment-status-badge";
 import { appointmentApi } from "@/features/appointments/api/appointment.api";
@@ -37,6 +43,7 @@ import type { AppointmentResponse } from "@/features/appointments/types/appointm
 import { feedbackApi } from "@/features/feedback/api/feedback.api";
 import type { FeedbackResponse } from "@/features/feedback/types/feedback.types";
 import { apiRequest } from "@/lib/api-client";
+import { highlightText } from "@/lib/highlight-search";
 import { getErrorMessage } from "@/lib/utils";
 
 interface CurrentUser {
@@ -49,6 +56,10 @@ function toComparableDateTime(value: AppointmentResponse) {
   return new Date(
     `${value.appointmentDate}T${value.appointmentTime}`,
   ).getTime();
+}
+
+function normalize(value: string) {
+  return value.trim().toLowerCase();
 }
 
 export default function PatientVisitsPage() {
@@ -74,6 +85,11 @@ export default function PatientVisitsPage() {
   const [deletingFeedback, setDeletingFeedback] =
     useState<FeedbackResponse | null>(null);
   const [isDeletingFeedback, setIsDeletingFeedback] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(8);
+
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const loadVisits = useCallback(async (patientId?: number) => {
     if (!patientId) return;
@@ -139,6 +155,48 @@ export default function PatientVisitsPage() {
       (a, b) => toComparableDateTime(b) - toComparableDateTime(a),
     );
   }, [appointments]);
+
+  const filteredAppointments = useMemo(() => {
+    const query = normalize(deferredSearchQuery);
+    if (!query) return sortedAppointments;
+
+    return sortedAppointments.filter((appointment) => {
+      const haystack = [
+        appointment.appointmentId?.toString(),
+        appointment.appointmentNumber?.toString(),
+        appointment.appointmentDate,
+        appointment.appointmentTime,
+        appointment.appointmentType,
+        appointment.status,
+        appointment.doctorId?.toString(),
+        appointment.doctor?.fullName,
+        appointment.doctor?.specialization,
+        appointment.room?.roomNumber,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(query);
+    });
+  }, [deferredSearchQuery, sortedAppointments]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAppointments.length / pageSize));
+
+  const paginatedAppointments = useMemo(() => {
+    const startIndex = currentPage * pageSize;
+    return filteredAppointments.slice(startIndex, startIndex + pageSize);
+  }, [currentPage, filteredAppointments, pageSize]);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [deferredSearchQuery, pageSize]);
+
+  useEffect(() => {
+    if (currentPage > totalPages - 1) {
+      setCurrentPage(totalPages - 1);
+    }
+  }, [currentPage, totalPages]);
 
   const feedbackByAppointment = useMemo(() => {
     const map = new Map<number, FeedbackResponse>();
@@ -255,125 +313,172 @@ export default function PatientVisitsPage() {
     }
   }
 
-  return (
-    <div className="col-start-1 col-end-14 space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-border/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-            <CalendarDays className="h-3.5 w-3.5" />
-            Patient visits
-          </div>
-          <h1 className="text-2xl font-semibold">My Visits</h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            Review your appointment history and open each visit to view full
-            details.
+  const visitColumns: Column<AppointmentResponse>[] = [
+    {
+      header: "Appointment",
+      render: (appointment) => (
+        <div className="space-y-1">
+          <p className="font-medium">
+            {highlightText(
+              `#${appointment.appointmentNumber}`,
+              deferredSearchQuery,
+            )}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            ID #{appointment.appointmentId}
           </p>
         </div>
+      ),
+      className: "min-w-[160px] px-5 py-4",
+    },
+    {
+      header: "Date & Time",
+      render: (appointment) => (
+        <div className="space-y-1 text-sm">
+          <span className="flex items-center gap-1.5">
+            <CalendarDays className="size-3.5 text-muted-foreground" />
+            {appointment.appointmentDate}
+          </span>
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <Clock3 className="size-3.5" />
+            {appointment.appointmentTime}
+          </span>
+        </div>
+      ),
+      className: "min-w-[170px] px-5 py-4",
+    },
+    {
+      header: "Doctor",
+      render: (appointment) =>
+        highlightText(
+          appointment.doctor?.fullName || `Doctor #${appointment.doctorId}`,
+          deferredSearchQuery,
+        ),
+      className: "min-w-[220px] px-5 py-4 text-muted-foreground",
+    },
+    {
+      header: "Type",
+      render: (appointment) => (
+        <Badge variant="outline" className="rounded-full px-3 py-0.5 text-xs">
+          {appointment.appointmentType.replace("_", " ")}
+        </Badge>
+      ),
+      className: "w-[170px] px-5 py-4",
+    },
+    {
+      header: "Status",
+      render: (appointment) => (
+        <AppointmentStatusBadge status={appointment.status} />
+      ),
+      className: "w-[140px] px-5 py-4",
+    },
+    {
+      header: "Actions",
+      render: (appointment) => {
+        const existingFeedback = feedbackByAppointment.get(
+          appointment.appointmentId,
+        );
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            loadVisits(patient?.userId);
-            loadFeedback(patient?.userId);
-          }}
-          disabled={!patient?.userId || isLoading || isFeedbackLoading}
-        >
-          <RefreshCcw className="h-4 w-4" />
-          Refresh
-        </Button>
-      </div>
+        return (
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={() => setSelectedAppointment(appointment)}
+              aria-label="View visit details"
+              title="View details"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
 
-      <Card className="border-border/60 bg-card/80">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">
-            Appointment Details
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="space-y-3">
-          {isLoading ? (
-            <p className="text-sm text-muted-foreground">
-              Loading your visits...
-            </p>
-          ) : sortedAppointments.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No visits found for your account.
-            </p>
-          ) : (
-            sortedAppointments.map((appointment) => (
-              <div
-                key={appointment.appointmentId}
-                className="rounded-md border border-border/60 p-4"
+            {existingFeedback ? (
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() =>
+                  openFeedbackActionDialog(appointment, existingFeedback)
+                }
+                aria-label="View feedback"
+                title="View feedback"
               >
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">
-                        Appointment #{appointment.appointmentNumber}
-                      </p>
-                      <AppointmentStatusBadge status={appointment.status} />
-                    </div>
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => openCreateFeedbackDialog(appointment)}
+                aria-label="Add feedback"
+                title="Add feedback"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        );
+      },
+      className: "w-[130px] px-5 py-4 text-center",
+    },
+  ];
 
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                      <span className="inline-flex items-center gap-1.5">
-                        <CalendarDays className="h-4 w-4" />
-                        {appointment.appointmentDate}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <Clock3 className="h-4 w-4" />
-                        {appointment.appointmentTime}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <Stethoscope className="h-4 w-4" />
-                        Doctor #{appointment.doctorId}
-                      </span>
-                    </div>
-                  </div>
+  return (
+    <div className="col-start-1 col-end-14 space-y-6">
+      <PageHeader
+        title="My Visits"
+        description="Review your appointment history and open each visit to view full details."
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              loadVisits(patient?.userId);
+              loadFeedback(patient?.userId);
+            }}
+            disabled={!patient?.userId || isLoading || isFeedbackLoading}
+            aria-label="Refresh visits"
+            title="Refresh"
+          >
+            <RefreshCcw className="h-4 w-4" />
+          </Button>
+        }
+      />
 
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedAppointment(appointment)}
-                    >
-                      <Eye className="h-4 w-4" />
-                      View Details
-                    </Button>
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search by appointment, doctor, date, type, room, or status"
+        resultCount={filteredAppointments.length}
+      />
 
-                    {feedbackByAppointment.get(appointment.appointmentId) ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          openFeedbackActionDialog(
-                            appointment,
-                            feedbackByAppointment.get(
-                              appointment.appointmentId,
-                            ) as FeedbackResponse,
-                          )
-                        }
-                      >
-                        <MessageSquare className=" h-4 w-4" />
-                        View Feedback
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openCreateFeedbackDialog(appointment)}
-                      >
-                        <Plus className="h-4 w-4" />
-                        Add Feedback
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
+        {isLoading ? (
+          <div className="px-6 py-10 text-center text-sm text-muted-foreground">
+            Loading your visits...
+          </div>
+        ) : (
+          <>
+            <DataTable
+              columns={visitColumns}
+              data={paginatedAppointments}
+              pageable={false}
+              showActions={false}
+              minWidth="1120px"
+              emptyMessage="No visits found for your account."
+            />
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              pageSizeOptions={[5, 8, 10, 20]}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setCurrentPage(0);
+              }}
+            />
+          </>
+        )}
+      </div>
 
       <AppointmentDetailsDialog
         appointment={selectedAppointment}
@@ -384,15 +489,26 @@ export default function PatientVisitsPage() {
         open={feedbackActionDialogOpen}
         onOpenChange={setFeedbackActionDialogOpen}
       >
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="gap-5 border-border/60 bg-card p-0 shadow-xl sm:max-w-[460px]">
           <DialogHeader>
-            <DialogTitle>Feedback Actions</DialogTitle>
-            <DialogDescription>
-              Choose what you want to do with your feedback.
-            </DialogDescription>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <MessageSquare className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Feedback Actions
+                  </DialogTitle>
+                  <DialogDescription>
+                    Choose what you want to do with your feedback.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="rounded-md border border-border/60 bg-muted/20 p-3">
+          <div className="mx-6 rounded-lg border border-border/60 bg-muted/20 p-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Star className="h-4 w-4 fill-current" />
               {editingFeedback?.rating ?? 0}/5
@@ -405,7 +521,7 @@ export default function PatientVisitsPage() {
             ) : null}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button
               type="button"
               variant="outline"
@@ -443,21 +559,30 @@ export default function PatientVisitsPage() {
       </Dialog>
 
       <Dialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[520px]">
           <DialogHeader>
-            <DialogTitle>
-              {feedbackMode === "create" ? "Add Feedback" : "Edit Feedback"}
-            </DialogTitle>
-            <DialogDescription>
-              {feedbackMode === "create"
-                ? "Share your visit experience for this appointment."
-                : "Update your feedback. Backend edit rules still apply."}
-            </DialogDescription>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Star className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    {feedbackMode === "create" ? "Add Feedback" : "Edit Feedback"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {feedbackMode === "create"
+                      ? "Share your visit experience for this appointment."
+                      : "Update your feedback. Backend edit rules still apply."}
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 px-6">
             <div className="space-y-2">
-              <Label>Rating *</Label>
+              <Label className="form-label mb-0">Rating *</Label>
               <div className="flex flex-wrap gap-2">
                 {[1, 2, 3, 4, 5].map((rating) => (
                   <Button
@@ -477,7 +602,9 @@ export default function PatientVisitsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="visit-feedback-comments">Comments</Label>
+              <Label className="form-label mb-0" htmlFor="visit-feedback-comments">
+                Comments
+              </Label>
               <Textarea
                 id="visit-feedback-comments"
                 maxLength={255}
@@ -492,7 +619,7 @@ export default function PatientVisitsPage() {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button
               type="button"
               variant="outline"
@@ -513,16 +640,27 @@ export default function PatientVisitsPage() {
       </Dialog>
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="gap-5 border-border/60 bg-card p-0 shadow-xl sm:max-w-[460px]">
           <DialogHeader>
-            <DialogTitle>Delete Feedback</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this feedback? This action cannot
-              be undone.
-            </DialogDescription>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                  <Trash2 className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Delete Feedback
+                  </DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete this feedback? This action cannot
+                    be undone.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          <DialogFooter>
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button
               type="button"
               variant="outline"

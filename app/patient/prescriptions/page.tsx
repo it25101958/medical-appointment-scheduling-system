@@ -1,8 +1,7 @@
-import { Pill } from "lucide-react";
-
 import { apiRequest } from "@/lib/api-client";
 import { PrescriptionList } from "@/features/admin/components/prescription-list";
 import { PaginationControls } from "@/features/admin/components/pagination-controls";
+import { PageHeader } from "@/components/ui";
 
 interface PrescriptionListItem {
   prescriptionId: number;
@@ -47,27 +46,20 @@ export default async function PatientPrescriptionsPage({
 
   return (
     <div className="space-y-6 col-start-1 col-end-14">
-      <div className="flex flex-col gap-1">
-        <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-md border border-border/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-          <Pill className="h-3.5 w-3.5" />
-          Patient prescriptions
-        </div>
-        <h1 className="text-2xl font-semibold">My Prescriptions</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          View prescriptions issued by your doctor and open each record for
-          medication details.
-        </p>
-      </div>
+      <PageHeader
+        title="My Prescriptions"
+        description="View prescriptions issued by your doctor and open each record for medication details."
+      />
 
       {errorMessage ? (
-        <div className="rounded-2xl border bg-card p-8 text-sm text-muted-foreground shadow-sm">
+        <div className="rounded-lg border border-border bg-card p-8 text-sm text-muted-foreground">
           {errorMessage}
         </div>
       ) : (
-        <div className="rounded-3xl border border-border/60 bg-card/50 p-4 shadow-sm">
+        <>
           <PrescriptionList data={data.content || []} />
           <PaginationControls currentPage={page} totalPages={data.totalPages} />
-        </div>
+        </>
       )}
     </div>
   );

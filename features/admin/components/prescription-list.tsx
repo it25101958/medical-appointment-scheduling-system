@@ -1,17 +1,13 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
-import { Calendar } from "lucide-react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
+import { Calendar, Eye } from "lucide-react";
 import {
   Badge,
   DataTable,
   type Column,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Input,
-  Label,
+  Button,
+  SearchBar,
 } from "@/components/ui";
 import { highlightText } from "@/lib/highlight-search";
 import { apiRequest } from "@/lib/api-client";
@@ -51,8 +47,10 @@ function normalize(value: string) {
 
 export function PrescriptionList({
   data = [],
+  showSearch = true,
 }: {
   data: PrescriptionListItem[];
+  showSearch?: boolean;
 }) {
   const [selectedPrescription, setSelectedPrescription] =
     useState<PrescriptionResponse | null>(null);
@@ -80,6 +78,25 @@ export function PrescriptionList({
       return haystack.includes(query);
     });
   }, [deferredSearchQuery, data]);
+
+  const viewPrescription = useCallback(async (prescription: PrescriptionListItem) => {
+    setLoadingPrescriptionId(prescription.prescriptionId);
+    try {
+      const details = await apiRequest<PrescriptionResponse>(
+        `/prescription/${prescription.prescriptionId}`,
+        {
+          method: "GET",
+          cache: "no-store",
+        },
+      );
+
+      setSelectedPrescription(details);
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Could not load prescription"));
+    } finally {
+      setLoadingPrescriptionId(null);
+    }
+  }, []);
 
   const columns: Column<PrescriptionListItem>[] = useMemo(
     () => [
@@ -128,44 +145,54 @@ export function PrescriptionList({
         ),
         className: "px-5 py-4 text-right",
       },
+      {
+        header: "Actions",
+        render: (p) => (
+          <div className="flex items-center justify-center">
+            <Button
+              size="icon-sm"
+              variant="outline"
+              onClick={() => viewPrescription(p)}
+              aria-label="View prescription"
+              title="View"
+              disabled={loadingPrescriptionId === p.prescriptionId}
+            >
+              <Eye className="size-4" />
+            </Button>
+          </div>
+        ),
+        className: "w-[110px] px-5 py-4 text-center",
+      },
     ],
-    [deferredSearchQuery],
+    [deferredSearchQuery, loadingPrescriptionId, viewPrescription],
   );
-
-  async function viewPrescription(prescription: PrescriptionListItem) {
-    setLoadingPrescriptionId(prescription.prescriptionId);
-    try {
-      const details = await apiRequest<PrescriptionResponse>(
-        `/prescription/${prescription.prescriptionId}`,
-        {
-          method: "GET",
-          cache: "no-store",
-        },
-      );
-
-      setSelectedPrescription(details);
-    } catch (error) {
-      toast.error(getErrorMessage(error, "Could not load prescription"));
-    } finally {
-      setLoadingPrescriptionId(null);
-    }
-  }
 
   return (
     <>
+      {showSearch && (
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by prescription, appointment, patient, doctor, or status"
+          resultCount={filteredPrescriptions.length}
+        />
+      )}
+
+      <div className={showSearch ? "mt-6" : ""}>
       <DataTable
         columns={columns}
         data={filteredPrescriptions}
-        onView={viewPrescription}
         pageable={true}
         pageSize={10}
-        showActions={true}
+        showActions={false}
+        minWidth="1080px"
         emptyMessage={
           loadingPrescriptionId
             ? `Loading prescription #${loadingPrescriptionId}...`
             : "No prescriptions found."
         }
       />
+      </div>
 
       <PrescriptionDetailsDialog
         prescription={selectedPrescription}

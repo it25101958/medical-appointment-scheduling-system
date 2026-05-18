@@ -14,10 +14,12 @@ import {
   CalendarPlus,
   CalendarClock,
   FileText,
+  Pill,
   ClipboardList,
   CreditCard,
   History,
   MessageSquare,
+  UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -65,10 +67,22 @@ export default function PatientDashboard() {
       action: openAppointmentForm,
     },
     {
+      icon: UserRound,
+      title: "My Profile",
+      buttonText: "View Profile",
+      action: () => router.push("/patient/profile"),
+    },
+    {
       icon: FileText,
       title: "My Prescriptions",
       buttonText: "View Current",
       action: () => router.push("/patient/prescriptions"),
+    },
+    {
+      icon: Pill,
+      title: "My Medications",
+      buttonText: "View Medicines",
+      action: () => router.push("/patient/medications"),
     },
     {
       icon: ClipboardList,

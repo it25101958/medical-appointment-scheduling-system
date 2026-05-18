@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { BillingManagement } from "@/features/billing";
+import { PageHeader } from "@/components/ui";
 import { apiRequest } from "@/lib/api-client";
 import { getErrorMessage } from "@/lib/utils";
 
@@ -37,8 +38,14 @@ export default function PatientBillingPage() {
 
   if (loading) {
     return (
-      <div className="col-start-1 col-end-14 p-4 text-sm text-muted-foreground">
-        Loading billing records...
+      <div className="col-start-1 col-end-14 space-y-6">
+        <PageHeader
+          title="My Billing"
+          description="Review billing records connected to your appointments."
+        />
+        <div className="rounded-lg border border-border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
+          Loading billing records...
+        </div>
       </div>
     );
   }

@@ -13,6 +13,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -75,15 +76,27 @@ export function PrescriptionDetailsDialog({ prescription, onClose }: Props) {
 
   return (
     <Dialog open={!!prescription} onOpenChange={onClose}>
-      <DialogContent className="boxwidth">
-        <DialogHeader className="px-6 py-5">
-          <DialogTitle className="text-xl font-normal">
-            Prescription Details
-          </DialogTitle>
+      <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[900px]">
+        <DialogHeader>
+          <div className="border-b border-border/60 px-6 pb-5 pt-6">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Pill className="size-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-semibold tracking-tight">
+                  Prescription Details
+                </DialogTitle>
+                <DialogDescription>
+                  Review prescription details and medication instructions.
+                </DialogDescription>
+              </div>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="max-h-[80vh] overflow-y-auto px-6 py-5">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-muted/50 p-4">
+        <div className="space-y-5 px-6 pb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 p-4">
             <div>
               <p className="text-sm text-muted-foreground">
                 Prescription Reference
@@ -146,7 +159,7 @@ export function PrescriptionDetailsDialog({ prescription, onClose }: Props) {
             />
           </div>
 
-          <div className="mt-5 rounded-xl border bg-card p-4">
+          <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
             <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
               <FileText className="h-4 w-4" />
               Notes
@@ -157,12 +170,13 @@ export function PrescriptionDetailsDialog({ prescription, onClose }: Props) {
             </p>
           </div>
 
-          <div className="mt-5 rounded-xl border bg-card p-4">
+          <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
             <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
               <Pill className="h-4 w-4" />
               Medications
             </div>
 
+            <div className="overflow-hidden rounded-lg border border-border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -196,6 +210,7 @@ export function PrescriptionDetailsDialog({ prescription, onClose }: Props) {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
         </div>
       </DialogContent>
@@ -213,7 +228,7 @@ function InfoItem({
   value: string;
 }) {
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
       <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
         {icon}
         {label}

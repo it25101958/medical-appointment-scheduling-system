@@ -3,7 +3,6 @@ export type LabResultStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
 export interface LabResultRequest {
   appointmentId: number;
   patientId: number;
-  labTestId?: number;
   testName: string;
   resultValue: string;
   referenceRange: string;

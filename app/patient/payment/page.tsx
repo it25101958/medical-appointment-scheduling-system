@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { PageHeader } from "@/components/ui";
 import { PaymentManagement } from "@/features/payment";
 import { apiRequest } from "@/lib/api-client";
 import { getErrorMessage } from "@/lib/utils";
@@ -37,8 +38,14 @@ export default function PatientPaymentPage() {
 
   if (loading) {
     return (
-      <div className="col-start-1 col-end-14 p-4 text-sm text-muted-foreground">
-        Loading payment records...
+      <div className="col-start-1 col-end-14 space-y-6">
+        <PageHeader
+          title="My Payments"
+          description="Review and create payments connected to your appointments."
+        />
+        <div className="rounded-lg border border-border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
+          Loading payment records...
+        </div>
       </div>
     );
   }
