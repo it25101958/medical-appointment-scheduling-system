@@ -289,7 +289,11 @@ export function AppointmentForm({
               />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent
+              position="popper"
+              align="start"
+              className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+            >
               {specializations.map((specialization) => (
                 <SelectItem key={specialization} value={specialization}>
                   {specialization.replaceAll("_", " ")}
@@ -515,9 +519,8 @@ export function AppointmentForm({
                 {isSubmitting ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Send className="mr-2 h-4 w-4" />
+                  <p>Schedule Appointment</p>
                 )}
-                Schedule Appointment
               </Button>
             </div>
           );
