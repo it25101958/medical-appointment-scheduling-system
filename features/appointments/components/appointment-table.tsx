@@ -39,13 +39,16 @@ export function AppointmentTable({
     { header: "Time", accessor: "appointmentTime" },
     {
       header: "Patient",
-      render: (appointment) => `Patient ${appointment.patientId}`,
+      render: (appointment) => `${appointment.patient.fullName}`,
     },
     {
       header: "Doctor",
-      render: (appointment) => `Doctor ${appointment.doctorId}`,
+      render: (appointment) => `${appointment.doctor.fullName}`,
     },
-    { header: "Room", render: (appointment) => `Room ${appointment.roomId}` },
+    {
+      header: "Room",
+      render: (appointment) => `${appointment.room.roomNumber}`,
+    },
     {
       header: "Status",
       render: (appointment) => (

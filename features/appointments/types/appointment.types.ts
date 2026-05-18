@@ -23,9 +23,9 @@ export interface AppointmentResponse {
   status: AppointmentStatus;
   createdAt: string;
   updatedAt: string;
-  patientId: number;
-  doctorId: number;
-  roomId: number;
+  patient: string;
+  doctor: string;
+  room: string;
 }
 
 export interface AppointmentCreateRequest {

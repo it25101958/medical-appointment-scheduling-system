@@ -78,7 +78,7 @@ export function AppointmentLinkedRecords({
           title="Prescription"
           description={
             prescription
-              ? `Prescription #${prescription.prescriptionId} - ${prescription.status}`
+              ? `Prescription ${prescription.prescriptionId} - ${prescription.status}`
               : loading
                 ? "Loading prescription..."
                 : "No prescription added yet."

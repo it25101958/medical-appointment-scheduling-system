@@ -61,7 +61,7 @@ export function AppointmentDetailsDialog({
             <InfoItem
               icon={<Hash className="h-4 w-4" />}
               label="Queue Number"
-              value={`#${appointment.appointmentNumber}`}
+              value={`${appointment.appointmentNumber}`}
             />
 
             <InfoItem
@@ -79,19 +79,19 @@ export function AppointmentDetailsDialog({
             <InfoItem
               icon={<User className="h-4 w-4" />}
               label="Patient"
-              value={`Patient #${appointment.patientId}`}
+              value={`${appointment.patient.fullName}`}
             />
 
             <InfoItem
               icon={<Stethoscope className="h-4 w-4" />}
               label="Doctor"
-              value={`Doctor #${appointment.doctorId}`}
+              value={`${appointment.doctor.fullName}`}
             />
 
             <InfoItem
               icon={<DoorOpen className="h-4 w-4" />}
               label="Room"
-              value={`Room #${appointment.roomId}`}
+              value={`${appointment.room.fullName}`}
             />
           </div>
 

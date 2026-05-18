@@ -37,6 +37,7 @@ import { getErrorMessage } from "@/lib/utils";
 import { CrudActionButton } from "@/features/shared/components/crud-action-button";
 import { CrudPageHeader } from "@/features/shared/components/crud-page-header";
 import { DeleteConfirmDialog } from "@/features/shared/components/delete-confirm-dialog";
+import { SearchBar } from "@/components/ui";
 
 function createEmptyForm(): LaboratoryPayload {
   return {
@@ -313,28 +314,14 @@ export function LaboratoryManagement({
         }
       />
 
-      <Card className="border-border/60 bg-card/80 backdrop-blur">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">
-            Search laboratories
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
-          <div className="grid gap-2">
-            <Label htmlFor="laboratory-search">Quick search</Label>
-            <Input
-              id="laboratory-search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search by name, address, phone, or email"
-            />
-          </div>
-          <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            {filteredLaboratories.length} of {laboratories.length} laboratories
-            shown
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mb-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by name, address, phone, or email"
+          resultCount={filteredLaboratories.length}
+        />
+      </div>
 
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/50 shadow-sm">
         {loading ? (
