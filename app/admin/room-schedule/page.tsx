@@ -420,7 +420,7 @@ export default function AdminRoomSchedulePage() {
           </div>
         }
       >
-        <div className="grid gap-4 py-2">
+        <div className="grid gap-4 py-2 w-fit">
           <div className="grid gap-2">
             <Label htmlFor="room-select">Room *</Label>
             <Select
