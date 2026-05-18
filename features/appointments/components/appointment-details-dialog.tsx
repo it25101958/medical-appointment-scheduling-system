@@ -91,7 +91,7 @@ export function AppointmentDetailsDialog({
             <InfoItem
               icon={<DoorOpen className="h-4 w-4" />}
               label="Room"
-              value={`${appointment.room.fullName}`}
+              value={`${appointment.room.roomNumber}`}
             />
           </div>
 

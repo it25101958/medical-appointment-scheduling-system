@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CalendarClock, Plus, Trash2 } from "lucide-react";
+import { CalendarClock, ClipboardPlus, FileText, Pill, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { apiRequest } from "@/lib/api-client";
@@ -17,6 +17,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -466,12 +467,14 @@ export function TodayAppointmentsList({ appointments }: Props) {
 
                   <TableCell className="px-4 py-2">
                     <span className="text-sm">
-                      Patient {appointment.patientId}
+                      Patient {appointment.patient.FullName}
                     </span>
                   </TableCell>
 
                   <TableCell className="px-4 py-2">
-                    <span className="text-sm">Room {appointment.roomId}</span>
+                    <span className="text-sm">
+                      Room {appointment.room.roomNumber}
+                    </span>
                   </TableCell>
 
                   <TableCell className="px-4 py-2">
@@ -566,20 +569,51 @@ export function TodayAppointmentsList({ appointments }: Props) {
       />
 
       <Dialog open={prescriptionOpen} onOpenChange={setPrescriptionOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[920px]">
           <DialogHeader>
-            <DialogTitle>
-              Create Prescription
-              {clinicalAppointment
-                ? ` - Appointment #${clinicalAppointment.appointmentId}`
-                : ""}
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <ClipboardPlus className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Create Prescription
+                  </DialogTitle>
+                  <DialogDescription>
+                    Add medication instructions for the active appointment.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="space-y-5">
+          <div className="space-y-5 px-6">
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-background text-primary ring-1 ring-border/70">
+                  <CalendarClock className="size-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium leading-none">
+                    {clinicalAppointment
+                      ? `Appointment #${clinicalAppointment.appointmentId}`
+                      : "Appointment"}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {clinicalAppointment
+                      ? `${clinicalAppointment.appointmentDate} at ${formatTime(
+                          clinicalAppointment.appointmentTime,
+                        )}`
+                      : "Prescription will be linked to the selected appointment."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label>Status</Label>
+                <Label className="form-label mb-0">Status</Label>
                 <Select
                   value={prescriptionStatus}
                   onValueChange={setPrescriptionStatus}
@@ -587,7 +621,11 @@ export function TodayAppointmentsList({ appointments }: Props) {
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent
+                    position="popper"
+                    align="start"
+                    className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+                  >
                     <SelectItem value="ACTIVE">Active</SelectItem>
                     <SelectItem value="COMPLETED">Completed</SelectItem>
                   </SelectContent>
@@ -596,18 +634,29 @@ export function TodayAppointmentsList({ appointments }: Props) {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="prescription-notes">Notes</Label>
-              <Textarea
-                id="prescription-notes"
-                value={prescriptionNotes}
-                onChange={(event) => setPrescriptionNotes(event.target.value)}
-                placeholder="Optional prescription notes"
-              />
+              <Label className="form-label mb-0" htmlFor="prescription-notes">
+                Notes
+              </Label>
+              <div className="relative">
+                <FileText className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" />
+                <Textarea
+                  id="prescription-notes"
+                  className="pl-9"
+                  value={prescriptionNotes}
+                  onChange={(event) => setPrescriptionNotes(event.target.value)}
+                  placeholder="Optional prescription notes"
+                />
+              </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <Label>Medication Items</Label>
+                <div>
+                  <Label className="form-label mb-0">Medication Items</Label>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Add each medicine, dosage, quantity, and patient guidance.
+                  </p>
+                </div>
                 <Button
                   type="button"
                   size="sm"
@@ -620,112 +669,131 @@ export function TodayAppointmentsList({ appointments }: Props) {
                   }
                 >
                   <Plus className="h-4 w-4" />
-                  Add Medication
+                  Add
                 </Button>
               </div>
 
               {prescriptionItems.map((item, index) => (
                 <div
                   key={index}
-                  className="grid gap-3 rounded-md border p-3 md:grid-cols-[minmax(0,1fr)_130px_110px_minmax(0,1fr)_40px] md:items-end"
+                  className="rounded-lg border border-border/60 bg-muted/20 p-4"
                 >
-                  <div className="grid gap-2">
-                    <Label>Medication</Label>
-                    <Select
-                      value={item.medicationId ? String(item.medicationId) : ""}
-                      onValueChange={(value) =>
-                        updatePrescriptionItem(index, {
-                          medicationId: Number(value),
-                        })
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex size-8 items-center justify-center rounded-md bg-background text-muted-foreground ring-1 ring-border/70">
+                        <Pill className="size-4" />
+                      </div>
+                      <p className="text-sm font-medium">
+                        Medication {index + 1}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="icon-sm"
+                      variant="ghost"
+                      onClick={() =>
+                        setPrescriptionItems((current) =>
+                          current.length === 1
+                            ? current
+                            : current.filter(
+                                (_, itemIndex) => itemIndex !== index,
+                              ),
+                        )
                       }
-                      disabled={loadingClinicalData}
+                      disabled={prescriptionItems.length === 1}
+                      aria-label="Remove medication"
+                      title="Remove medication"
                     >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={
-                            loadingClinicalData
-                              ? "Loading..."
-                              : "Select medication"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {activeMedications.map((medication) => (
-                          <SelectItem
-                            key={medication.medicationId}
-                            value={String(medication.medicationId)}
-                          >
-                            {getMedicationLabel(medication)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
 
-                  <div className="grid gap-2">
-                    <Label>Dosage</Label>
-                    <Input
-                      value={item.dosage}
-                      onChange={(event) =>
-                        updatePrescriptionItem(index, {
-                          dosage: event.target.value,
-                        })
-                      }
-                      placeholder="1 tablet"
-                    />
-                  </div>
+                  <div className="grid gap-3 md:grid-cols-[minmax(0,1.3fr)_130px_100px_minmax(0,1fr)]">
+                    <div className="grid gap-2">
+                      <Label className="form-label mb-0">Medication</Label>
+                      <Select
+                        value={
+                          item.medicationId ? String(item.medicationId) : ""
+                        }
+                        onValueChange={(value) =>
+                          updatePrescriptionItem(index, {
+                            medicationId: Number(value),
+                          })
+                        }
+                        disabled={loadingClinicalData}
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={
+                              loadingClinicalData
+                                ? "Loading..."
+                                : "Select medication"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent
+                          position="popper"
+                          align="start"
+                          className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+                        >
+                          {activeMedications.map((medication) => (
+                            <SelectItem
+                              key={medication.medicationId}
+                              value={String(medication.medicationId)}
+                            >
+                              {getMedicationLabel(medication)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label>Qty</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={item.quantity || ""}
-                      onChange={(event) =>
-                        updatePrescriptionItem(index, {
-                          quantity: Number(event.target.value),
-                        })
-                      }
-                    />
-                  </div>
+                    <div className="grid gap-2">
+                      <Label className="form-label mb-0">Dosage</Label>
+                      <Input
+                        value={item.dosage}
+                        onChange={(event) =>
+                          updatePrescriptionItem(index, {
+                            dosage: event.target.value,
+                          })
+                        }
+                        placeholder="1 tablet"
+                      />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label>Instructions</Label>
-                    <Input
-                      value={item.specialInstructions}
-                      onChange={(event) =>
-                        updatePrescriptionItem(index, {
-                          specialInstructions: event.target.value,
-                        })
-                      }
-                      placeholder="After meals"
-                    />
-                  </div>
+                    <div className="grid gap-2">
+                      <Label className="form-label mb-0">Qty</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={item.quantity || ""}
+                        onChange={(event) =>
+                          updatePrescriptionItem(index, {
+                            quantity: Number(event.target.value),
+                          })
+                        }
+                      />
+                    </div>
 
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    onClick={() =>
-                      setPrescriptionItems((current) =>
-                        current.length === 1
-                          ? current
-                          : current.filter(
-                              (_, itemIndex) => itemIndex !== index,
-                            ),
-                      )
-                    }
-                    disabled={prescriptionItems.length === 1}
-                    aria-label="Remove medication"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                    <div className="grid gap-2">
+                      <Label className="form-label mb-0">Instructions</Label>
+                      <Input
+                        value={item.specialInstructions}
+                        onChange={(event) =>
+                          updatePrescriptionItem(index, {
+                            specialInstructions: event.target.value,
+                          })
+                        }
+                        placeholder="After meals"
+                      />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button
               variant="outline"
               onClick={() => setPrescriptionOpen(false)}

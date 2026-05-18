@@ -9,6 +9,7 @@ import {
   FileText,
   Clock,
   FlaskConical,
+  CreditCard,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -52,6 +53,12 @@ export default function StaffDashboard() {
       title: "Billing Docs",
       buttonText: "Draft Invoice",
       action: () => router.push("/staff/billing"),
+    },
+    {
+      icon: CreditCard,
+      title: "Payments",
+      buttonText: "Record Payment",
+      action: () => router.push("/staff/payment"),
     },
     {
       icon: Clock,

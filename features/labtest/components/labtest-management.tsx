@@ -1,7 +1,16 @@
 "use client";
 
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { Edit3, Eye, Plus, Trash2 } from "lucide-react";
+import {
+  Activity,
+  BadgeDollarSign,
+  Edit3,
+  Eye,
+  FlaskConical,
+  Plus,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -9,10 +18,8 @@ import {
   Button,
   DataTable,
   type Column,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+  PageHeader,
+  SearchBar,
 } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +28,7 @@ import { highlightText } from "@/lib/highlight-search";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -37,8 +45,6 @@ import {
 } from "@/lib/services/labtest-service";
 import { getErrorMessage } from "@/lib/utils";
 import { CrudActionButton } from "@/features/shared/components/crud-action-button";
-import { CrudPageHeader } from "@/features/shared/components/crud-page-header";
-import { DeleteConfirmDialog } from "@/features/shared/components/delete-confirm-dialog";
 
 type LabTestFilter = "all" | "active" | "inactive";
 
@@ -330,42 +336,36 @@ export function LabTestManagement({
 
   return (
     <div className="space-y-6 col-start-1 col-end-14">
-      <CrudPageHeader
+      <PageHeader
         title={title}
         description={description}
-        onRefresh={() => fetchLabTests(filter)}
-        createAction={
-          canManage
-            ? {
-                label: "New Lab Test",
-                icon: <Plus className="h-4 w-4" />,
-                onClick: openCreateDialog,
-              }
-            : undefined
+        actions={
+          <>
+            <Button
+              onClick={() => fetchLabTests(filter)}
+              size="sm"
+              variant="outline"
+              aria-label="Refresh lab tests"
+              title="Refresh"
+            >
+              <Activity className="h-4 w-4" />
+            </Button>
+            {canManage && (
+              <Button onClick={openCreateDialog} size="sm">
+                <Plus className="h-4 w-4" />
+                New Lab Test
+              </Button>
+            )}
+          </>
         }
       />
 
-      <Card className="border-border/60 bg-card/80 backdrop-blur">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">
-            Search lab tests
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px] md:items-end">
-          <div className="grid gap-2">
-            <Label htmlFor="labtest-search">Quick search</Label>
-            <Input
-              id="labtest-search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search by name, category, or price"
-            />
-          </div>
-          <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            {filteredLabTests.length} of {labTests.length} tests shown
-          </div>
-        </CardContent>
-      </Card>
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search by name, category, description, or price"
+        resultCount={filteredLabTests.length}
+      />
 
       <div className="flex flex-wrap gap-2">
         {filterButtons.map((button) => (
@@ -380,7 +380,7 @@ export function LabTestManagement({
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/50 shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         {loading ? (
           <div className="px-6 py-10 text-center text-sm text-muted-foreground">
             Loading lab tests...
@@ -402,18 +402,53 @@ export function LabTestManagement({
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[720px]">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[720px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
-              {selectedLabTest ? "Edit Lab Test" : "Create Lab Test"}
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <FlaskConical className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    {selectedLabTest ? "Edit Lab Test" : "Create Lab Test"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Configure the lab test details, pricing, and availability.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="grid gap-4 py-2 sm:grid-cols-2">
+          <div className="space-y-5 px-6">
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-background text-primary ring-1 ring-border/70">
+                  <FlaskConical className="size-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium leading-none">
+                    Lab Test Details
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Use clear names and categories so doctors can find tests
+                    quickly.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="labtest-name">Test Name</Label>
+              <Label className="form-label mb-0" htmlFor="labtest-name">
+                Test Name
+              </Label>
+              <div className="relative">
+                <FlaskConical className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="labtest-name"
+                className="pl-9"
                 value={formValues.testName}
                 onChange={(event) =>
                   setFormValues((current) => ({
@@ -423,12 +458,18 @@ export function LabTestManagement({
                 }
                 placeholder="e.g., Complete Blood Count"
               />
+              </div>
             </div>
 
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="labtest-category">Category</Label>
+              <Label className="form-label mb-0" htmlFor="labtest-category">
+                Category
+              </Label>
+              <div className="relative">
+                <Tag className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="labtest-category"
+                className="pl-9"
                 value={formValues.category}
                 onChange={(event) =>
                   setFormValues((current) => ({
@@ -438,10 +479,13 @@ export function LabTestManagement({
                 }
                 placeholder="e.g., Hematology"
               />
+              </div>
             </div>
 
             <div className="grid gap-2 sm:col-span-2">
-              <Label htmlFor="labtest-description">Description</Label>
+              <Label className="form-label mb-0" htmlFor="labtest-description">
+                Description
+              </Label>
               <Textarea
                 id="labtest-description"
                 value={formValues.description}
@@ -457,12 +501,17 @@ export function LabTestManagement({
             </div>
 
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="labtest-price">Standard Price</Label>
+              <Label className="form-label mb-0" htmlFor="labtest-price">
+                Standard Price
+              </Label>
+              <div className="relative">
+                <BadgeDollarSign className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="labtest-price"
                 type="number"
                 min="0"
                 step="0.01"
+                className="pl-9"
                 value={formValues.standardPrice}
                 onChange={(event) =>
                   setFormValues((current) => ({
@@ -472,10 +521,13 @@ export function LabTestManagement({
                 }
                 placeholder="0.00"
               />
+              </div>
             </div>
 
             <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="labtest-status">Status</Label>
+              <Label className="form-label mb-0" htmlFor="labtest-status">
+                Status
+              </Label>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -502,9 +554,10 @@ export function LabTestManagement({
                 </Button>
               </div>
             </div>
+            </div>
           </div>
 
-          <DialogFooter className="mt-4 gap-2">
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button
               variant="outline"
               onClick={() => {
@@ -527,16 +580,28 @@ export function LabTestManagement({
       </Dialog>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="sm:max-w-[680px]">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[680px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
-              Lab Test Details
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Eye className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Lab Test Details
+                  </DialogTitle>
+                  <DialogDescription>
+                    Review the selected lab test record.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
           {selectedLabTest && (
-            <div className="grid gap-4 py-2 sm:grid-cols-2">
-              <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 sm:col-span-2">
+            <div className="grid gap-4 px-6 pb-6 sm:grid-cols-2">
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-4 sm:col-span-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-lg font-semibold text-foreground">
                     {selectedLabTest.testName}
@@ -558,7 +623,7 @@ export function LabTestManagement({
                 </p>
               </div>
 
-              <div className="space-y-1 rounded-2xl border border-border/60 p-4">
+              <div className="space-y-1 rounded-lg border border-border/60 bg-muted/20 p-4">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Category
                 </p>
@@ -567,7 +632,7 @@ export function LabTestManagement({
                 </p>
               </div>
 
-              <div className="space-y-1 rounded-2xl border border-border/60 p-4">
+              <div className="space-y-1 rounded-lg border border-border/60 bg-muted/20 p-4">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Price
                 </p>
@@ -576,7 +641,7 @@ export function LabTestManagement({
                 </p>
               </div>
 
-              <div className="space-y-1 rounded-2xl border border-border/60 p-4">
+              <div className="space-y-1 rounded-lg border border-border/60 bg-muted/20 p-4">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Created
                 </p>
@@ -587,7 +652,7 @@ export function LabTestManagement({
                 </p>
               </div>
 
-              <div className="space-y-1 rounded-2xl border border-border/60 p-4">
+              <div className="space-y-1 rounded-lg border border-border/60 bg-muted/20 p-4">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Updated
                 </p>
@@ -602,19 +667,61 @@ export function LabTestManagement({
         </DialogContent>
       </Dialog>
 
-      <DeleteConfirmDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        title="Delete Lab Test"
-        message="Are you sure you want to delete this lab test? This action cannot be undone."
-        deleting={deleting}
-        onCancel={() => {
-          setDeleteOpen(false);
-          setSelectedLabTest(null);
-        }}
-        onConfirm={handleDelete}
-        confirmLabel="Delete Lab Test"
-      />
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="gap-5 border-border/60 bg-card p-0 shadow-xl sm:max-w-[460px]">
+          <DialogHeader>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                  <Trash2 className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Delete Lab Test
+                  </DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete this lab test?
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {selectedLabTest && (
+            <div className="px-6">
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+                <p className="text-sm font-medium">
+                  {selectedLabTest.testName}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {selectedLabTest.category} · LKR{" "}
+                  {Number(selectedLabTest.standardPrice).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteOpen(false);
+                setSelectedLabTest(null);
+              }}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

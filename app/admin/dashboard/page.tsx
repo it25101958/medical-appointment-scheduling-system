@@ -10,6 +10,7 @@ import {
   Bed,
   Calendar,
   FlaskConical,
+  CreditCard,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -22,6 +23,12 @@ export default function AdminPage() {
       title: "Billings",
       buttonText: "Manage Billing",
       action: () => router.push("/admin/billing"),
+    },
+    {
+      icon: CreditCard,
+      title: "Payments",
+      buttonText: "Manage Payments",
+      action: () => router.push("/admin/payment"),
     },
     {
       icon: ClipboardList,

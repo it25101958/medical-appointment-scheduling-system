@@ -14,6 +14,8 @@ import { LabOrderDetailsDialog } from "@/features/lab-orders/components/lab-orde
 import type { LabOrderResponse } from "@/features/lab-orders/types/lab-order.types";
 import { PrescriptionDetailsDialog } from "@/features/admin/components/prescription-details-dialog";
 import type { PrescriptionResponse } from "@/types/prescription-types";
+import { billingApi, type BillingResponse } from "@/features/billing";
+import { paymentApi, type PaymentResponse } from "@/features/payment";
 
 interface Props {
   appointmentId: number;
@@ -32,6 +34,8 @@ export function AppointmentLinkedRecords({
     null,
   );
   const [labOrders, setLabOrders] = useState<LabOrderResponse[]>([]);
+  const [billings, setBillings] = useState<BillingResponse[]>([]);
+  const [payments, setPayments] = useState<PaymentResponse[]>([]);
   const [selectedPrescription, setSelectedPrescription] =
     useState<PrescriptionResponse | null>(null);
   const [selectedLabOrder, setSelectedLabOrder] =
@@ -42,12 +46,15 @@ export function AppointmentLinkedRecords({
     async function loadLinkedRecords() {
       setLoading(true);
       try {
-        const [prescriptionsPage, orders] = await Promise.all([
+        const [prescriptionsPage, orders, billingRecords, paymentRecords] =
+          await Promise.all([
           apiRequest<PrescriptionsPage>("/prescription/my?page=0&size=100", {
             method: "GET",
             cache: "no-store",
           }).catch(() => ({ content: [] })),
           labOrderApi.search().catch(() => []),
+          billingApi.getByAppointment(appointmentId).catch(() => []),
+          paymentApi.getByAppointment(appointmentId).catch(() => []),
         ]);
 
         setPrescription(
@@ -60,6 +67,8 @@ export function AppointmentLinkedRecords({
             (order) => Number(order.appointmentId) === Number(appointmentId),
           ),
         );
+        setBillings(billingRecords || []);
+        setPayments(paymentRecords || []);
       } catch (error) {
         toast.error(getErrorMessage(error, "Could not load linked records"));
       } finally {
@@ -100,7 +109,25 @@ export function AppointmentLinkedRecords({
         <LinkedCard
           icon={<ReceiptText className="h-4 w-4" />}
           title="Billing"
-          description="View billing records connected to this appointment."
+          description={
+            billings.length > 0
+              ? `${billings.length} billing record${billings.length === 1 ? "" : "s"} added.`
+              : loading
+                ? "Loading billing records..."
+                : "No billing record added yet."
+          }
+        />
+
+        <LinkedCard
+          icon={<ReceiptText className="h-4 w-4" />}
+          title="Payments"
+          description={
+            payments.length > 0
+              ? `${payments.length} payment record${payments.length === 1 ? "" : "s"} added.`
+              : loading
+                ? "Loading payments..."
+                : "No payment recorded yet."
+          }
         />
 
         <LinkedCard

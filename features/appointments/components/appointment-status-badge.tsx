@@ -5,7 +5,7 @@ import { AppointmentStatus } from "../types/appointment.types";
 
 const statusStyles: Record<AppointmentStatus, string> = {
   PENDING: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  CONFIRMED: "bg-blue-100 text-blue-700 border-blue-200",
+  SCHEDULED: "bg-blue-100 text-blue-700 border-blue-200",
   COMPLETED: "bg-green-100 text-green-700 border-green-200",
   CANCELLED: "bg-red-100 text-red-700 border-red-200",
 };

@@ -1,7 +1,18 @@
 "use client";
 
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { Edit3, Eye, Plus, Trash2 } from "lucide-react";
+import {
+  Building2,
+  Clock,
+  Edit3,
+  Eye,
+  Mail,
+  MapPin,
+  Phone,
+  Plus,
+  RefreshCcw,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -9,10 +20,8 @@ import {
   Button,
   DataTable,
   type Column,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+  PageHeader,
+  SearchBar,
 } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +30,7 @@ import { highlightText } from "@/lib/highlight-search";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -35,9 +45,6 @@ import {
 } from "@/lib/services/laboratory-service";
 import { getErrorMessage } from "@/lib/utils";
 import { CrudActionButton } from "@/features/shared/components/crud-action-button";
-import { CrudPageHeader } from "@/features/shared/components/crud-page-header";
-import { DeleteConfirmDialog } from "@/features/shared/components/delete-confirm-dialog";
-import { SearchBar } from "@/components/ui";
 
 function createEmptyForm(): LaboratoryPayload {
   return {
@@ -299,18 +306,27 @@ export function LaboratoryManagement({
 
   return (
     <div className="space-y-6 col-start-1 col-end-14">
-      <CrudPageHeader
+      <PageHeader
         title={title}
         description={description}
-        onRefresh={fetchLaboratories}
-        createAction={
-          canManage
-            ? {
-                label: "New Laboratory",
-                icon: <Plus className="h-4 w-4" />,
-                onClick: openCreateDialog,
-              }
-            : undefined
+        actions={
+          <>
+            <Button
+              onClick={fetchLaboratories}
+              size="sm"
+              variant="outline"
+              aria-label="Refresh laboratories"
+              title="Refresh"
+            >
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            {canManage && (
+              <Button onClick={openCreateDialog} size="sm">
+                <Plus className="h-4 w-4" />
+                New Laboratory
+              </Button>
+            )}
+          </>
         }
       />
 
@@ -323,7 +339,7 @@ export function LaboratoryManagement({
         />
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/50 shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         {loading ? (
           <div className="px-6 py-10 text-center text-sm text-muted-foreground">
             Loading laboratories...
@@ -345,93 +361,138 @@ export function LaboratoryManagement({
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[720px]">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[720px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
-              {selectedLaboratory ? "Edit Laboratory" : "Create Laboratory"}
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Building2 className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    {selectedLaboratory
+                      ? "Edit Laboratory"
+                      : "Create Laboratory"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Manage laboratory contact details and operating hours.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="grid gap-4 py-2 sm:grid-cols-2">
-            <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="laboratory-name">Laboratory Name</Label>
-              <Input
-                id="laboratory-name"
-                value={formValues.name}
-                onChange={(event) =>
-                  setFormValues((current) => ({
-                    ...current,
-                    name: event.target.value,
-                  }))
-                }
-                placeholder="e.g., Central Diagnostics Lab"
-              />
-            </div>
+          <div className="space-y-5 px-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2 sm:col-span-1">
+                <Label className="form-label mb-0" htmlFor="laboratory-name">
+                  Laboratory Name
+                </Label>
+                <IconInput icon={<Building2 className="size-4" />}>
+                  <Input
+                    id="laboratory-name"
+                    className="pl-9"
+                    value={formValues.name}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        name: event.target.value,
+                      }))
+                    }
+                    placeholder="e.g., Central Diagnostics Lab"
+                  />
+                </IconInput>
+              </div>
 
-            <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="laboratory-phone">Phone</Label>
-              <Input
-                id="laboratory-phone"
-                value={formValues.phone}
-                onChange={(event) =>
-                  setFormValues((current) => ({
-                    ...current,
-                    phone: event.target.value,
-                  }))
-                }
-                placeholder="e.g., +94 77 123 4567"
-              />
-            </div>
+              <div className="grid gap-2 sm:col-span-1">
+                <Label className="form-label mb-0" htmlFor="laboratory-phone">
+                  Phone
+                </Label>
+                <IconInput icon={<Phone className="size-4" />}>
+                  <Input
+                    id="laboratory-phone"
+                    className="pl-9"
+                    value={formValues.phone}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        phone: event.target.value,
+                      }))
+                    }
+                    placeholder="e.g., +94 77 123 4567"
+                  />
+                </IconInput>
+              </div>
 
-            <div className="grid gap-2 sm:col-span-2">
-              <Label htmlFor="laboratory-address">Address</Label>
-              <Textarea
-                id="laboratory-address"
-                value={formValues.address}
-                onChange={(event) =>
-                  setFormValues((current) => ({
-                    ...current,
-                    address: event.target.value,
-                  }))
-                }
-                placeholder="Enter the full laboratory address"
-                rows={3}
-              />
-            </div>
+              <div className="grid gap-2 sm:col-span-2">
+                <Label className="form-label mb-0" htmlFor="laboratory-address">
+                  Address
+                </Label>
+                <div className="relative">
+                  <MapPin className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" />
+                  <Textarea
+                    id="laboratory-address"
+                    className="pl-9"
+                    value={formValues.address}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        address: event.target.value,
+                      }))
+                    }
+                    placeholder="Enter the full laboratory address"
+                    rows={3}
+                  />
+                </div>
+              </div>
 
-            <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="laboratory-opening-hours">Opening Hours</Label>
-              <Input
-                id="laboratory-opening-hours"
-                value={formValues.openingHours}
-                onChange={(event) =>
-                  setFormValues((current) => ({
-                    ...current,
-                    openingHours: event.target.value,
-                  }))
-                }
-                placeholder="e.g., Mon-Fri 08:00 - 17:00"
-              />
-            </div>
+              <div className="grid gap-2 sm:col-span-1">
+                <Label
+                  className="form-label mb-0"
+                  htmlFor="laboratory-opening-hours"
+                >
+                  Opening Hours
+                </Label>
+                <IconInput icon={<Clock className="size-4" />}>
+                  <Input
+                    id="laboratory-opening-hours"
+                    className="pl-9"
+                    value={formValues.openingHours}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        openingHours: event.target.value,
+                      }))
+                    }
+                    placeholder="e.g., Mon-Fri 08:00 - 17:00"
+                  />
+                </IconInput>
+              </div>
 
-            <div className="grid gap-2 sm:col-span-1">
-              <Label htmlFor="laboratory-email">Email</Label>
-              <Input
-                id="laboratory-email"
-                type="email"
-                value={formValues.email}
-                onChange={(event) =>
-                  setFormValues((current) => ({
-                    ...current,
-                    email: event.target.value,
-                  }))
-                }
-                placeholder="lab@example.com"
-              />
+              <div className="grid gap-2 sm:col-span-1">
+                <Label className="form-label mb-0" htmlFor="laboratory-email">
+                  Email
+                </Label>
+                <IconInput icon={<Mail className="size-4" />}>
+                  <Input
+                    id="laboratory-email"
+                    type="email"
+                    className="pl-9"
+                    value={formValues.email}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        email: event.target.value,
+                      }))
+                    }
+                    placeholder="lab@example.com"
+                  />
+                </IconInput>
+              </div>
             </div>
           </div>
 
-          <DialogFooter className="mt-4 gap-2">
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button
               variant="outline"
               onClick={() => {
@@ -454,16 +515,28 @@ export function LaboratoryManagement({
       </Dialog>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="sm:max-w-[680px]">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[680px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
-              Laboratory Details
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Eye className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Laboratory Details
+                  </DialogTitle>
+                  <DialogDescription>
+                    Review laboratory contact and operating information.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
           {selectedLaboratory && (
-            <div className="grid gap-4 py-2 sm:grid-cols-2">
-              <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 sm:col-span-2">
+            <div className="grid gap-4 px-6 pb-6 sm:grid-cols-2">
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-4 sm:col-span-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-lg font-semibold text-foreground">
                     {selectedLaboratory.name}
@@ -477,7 +550,7 @@ export function LaboratoryManagement({
                 </p>
               </div>
 
-              <div className="space-y-1 rounded-2xl border border-border/60 p-4">
+              <div className="space-y-1 rounded-lg border border-border/60 bg-muted/20 p-4">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Opening Hours
                 </p>
@@ -486,7 +559,7 @@ export function LaboratoryManagement({
                 </p>
               </div>
 
-              <div className="space-y-1 rounded-2xl border border-border/60 p-4">
+              <div className="space-y-1 rounded-lg border border-border/60 bg-muted/20 p-4">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Phone
                 </p>
@@ -495,7 +568,7 @@ export function LaboratoryManagement({
                 </p>
               </div>
 
-              <div className="space-y-1 rounded-2xl border border-border/60 p-4 sm:col-span-2">
+              <div className="space-y-1 rounded-lg border border-border/60 bg-muted/20 p-4 sm:col-span-2">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Email
                 </p>
@@ -504,7 +577,7 @@ export function LaboratoryManagement({
                 </p>
               </div>
 
-              <div className="space-y-1 rounded-2xl border border-border/60 p-4">
+              <div className="space-y-1 rounded-lg border border-border/60 bg-muted/20 p-4">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Created
                 </p>
@@ -515,7 +588,7 @@ export function LaboratoryManagement({
                 </p>
               </div>
 
-              <div className="space-y-1 rounded-2xl border border-border/60 p-4">
+              <div className="space-y-1 rounded-lg border border-border/60 bg-muted/20 p-4">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Updated
                 </p>
@@ -530,19 +603,75 @@ export function LaboratoryManagement({
         </DialogContent>
       </Dialog>
 
-      <DeleteConfirmDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        title="Delete Laboratory"
-        message="Are you sure you want to delete this laboratory? This action cannot be undone."
-        deleting={deleting}
-        onCancel={() => {
-          setDeleteOpen(false);
-          setSelectedLaboratory(null);
-        }}
-        onConfirm={handleDelete}
-        confirmLabel="Delete Laboratory"
-      />
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="gap-5 border-border/60 bg-card p-0 shadow-xl sm:max-w-[460px]">
+          <DialogHeader>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                  <Trash2 className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Delete Laboratory
+                  </DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete this laboratory?
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {selectedLaboratory && (
+            <div className="px-6">
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+                <p className="text-sm font-medium">{selectedLaboratory.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {selectedLaboratory.phone} · {selectedLaboratory.email}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteOpen(false);
+                setSelectedLaboratory(null);
+              }}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function IconInput({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative">
+      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+        {icon}
+      </span>
+      {children}
     </div>
   );
 }

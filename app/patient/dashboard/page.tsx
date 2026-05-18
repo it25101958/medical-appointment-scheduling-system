@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   CalendarPlus,
+  CalendarClock,
   FileText,
   ClipboardList,
   CreditCard,
@@ -79,7 +80,7 @@ export default function PatientDashboard() {
       icon: CreditCard,
       title: "Medical Billing",
       buttonText: "Pay Invoices",
-      action: () => router.push("/patient/billing"),
+      action: () => router.push("/patient/payment"),
     },
     {
       icon: History,
@@ -121,16 +122,27 @@ export default function PatientDashboard() {
         open={appointmentDialogOpen}
         onOpenChange={setAppointmentDialogOpen}
       >
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[760px]">
           <DialogHeader>
-            <DialogTitle>Schedule Appointment</DialogTitle>
-            <DialogDescription>
-              Choose your doctor, appointment time, and visit type.
-            </DialogDescription>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <CalendarClock className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Book Appointment
+                  </DialogTitle>
+                  <DialogDescription>
+                    Choose your doctor, appointment time, and visit type.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
           {isPatientLoading ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="px-6 pb-6 text-sm text-muted-foreground">
               Loading your patient profile...
             </p>
           ) : patient?.userId ? (
@@ -140,7 +152,7 @@ export default function PatientDashboard() {
               onCreated={() => setAppointmentDialogOpen(false)}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="px-6 pb-6 text-sm text-muted-foreground">
               We could not load your patient profile. Please sign in again.
             </p>
           )}

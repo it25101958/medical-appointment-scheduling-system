@@ -9,7 +9,6 @@ import {
 } from "react";
 import {
   Button,
-  StyledDialog,
   Select,
   SelectTrigger,
   SelectValue,
@@ -23,11 +22,27 @@ import {
   SearchBar,
   Label,
   Input,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui";
 import type { Column } from "@/components/ui";
 import { PaginationControls } from "@/features/admin/components/pagination-controls";
 import { highlightText } from "@/lib/highlight-search";
-import { Plus, RefreshCcw, Edit3, Trash2, Calendar } from "lucide-react";
+import {
+  Calendar,
+  CalendarClock,
+  Clock,
+  DoorOpen,
+  Edit3,
+  Plus,
+  RefreshCcw,
+  Stethoscope,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   roomScheduleApi,
@@ -210,22 +225,26 @@ export default function AdminRoomSchedulePage() {
       {
         header: "Actions",
         className:
-          "w-[180px] px-4 py-2 text-center text-xs font-medium tracking-wide text-muted-foreground",
+          "w-[120px] px-4 py-2 text-center text-xs font-medium tracking-wide text-muted-foreground",
         render: (schedule) => (
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <Button
-              size="sm"
+              size="icon-sm"
               variant="outline"
               onClick={() => openEditDialog(schedule)}
+              aria-label="Edit room schedule"
+              title="Edit"
             >
-              <Edit3 className="h-4 w-4" /> Edit
+              <Edit3 className="h-4 w-4" />
             </Button>
             <Button
-              size="sm"
+              size="icon-sm"
               variant="destructive"
               onClick={() => openDeleteDialog(schedule)}
+              aria-label="Delete room schedule"
+              title="Delete"
             >
-              <Trash2 className="h-4 w-4" /> Delete
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         ),
@@ -404,144 +423,222 @@ export default function AdminRoomSchedulePage() {
         />
       </div>
 
-      <StyledDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        title={selectedSchedule ? "Edit Room Schedule" : "Create Room Schedule"}
-        size="lg"
-        footer={
-          <div className="space-x-2">
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[640px]">
+          <DialogHeader>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <CalendarClock className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    {selectedSchedule
+                      ? "Edit Room Schedule"
+                      : "Create Room Schedule"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Assign a doctor to a room for a specific working window.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-5 px-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label className="form-label mb-0" htmlFor="room-select">
+                  Room *
+                </Label>
+                <Select
+                  value={String(formValues.roomId)}
+                  onValueChange={(value) =>
+                    setFormValues((current) => ({
+                      ...current,
+                      roomId: parseInt(value),
+                    }))
+                  }
+                >
+                  <SelectTrigger id="room-select">
+                    <DoorOpen className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Select a room" />
+                  </SelectTrigger>
+                  <SelectContent
+                    position="popper"
+                    align="start"
+                    className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+                  >
+                    {rooms.map((room) => (
+                      <SelectItem key={room.roomId} value={String(room.roomId)}>
+                        Room {String(room.roomNumber ?? "")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label className="form-label mb-0" htmlFor="doctor-select">
+                  Doctor *
+                </Label>
+                <Select
+                  value={String(formValues.doctorId)}
+                  onValueChange={(value) =>
+                    setFormValues((current) => ({
+                      ...current,
+                      doctorId: parseInt(value),
+                    }))
+                  }
+                >
+                  <SelectTrigger id="doctor-select">
+                    <Stethoscope className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Select a doctor" />
+                  </SelectTrigger>
+                  <SelectContent
+                    position="popper"
+                    align="start"
+                    className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+                  >
+                    {doctors.map((doctor) => (
+                      <SelectItem
+                        key={doctor.userId}
+                        value={String(doctor.userId)}
+                      >
+                        {getDoctorDisplayName(doctor)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label className="form-label mb-0">Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-10 w-full justify-start text-left font-normal"
+                  >
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    {formatDateForDisplay(formValues.selectedDate) ||
+                      "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <div className="p-3">
+                    <Input
+                      type="date"
+                      value={formValues.selectedDate}
+                      onChange={(e) => {
+                        setFormValues((current) => ({
+                          ...current,
+                          selectedDate: e.target.value,
+                          dayOfWeek: getDayOfWeek(e.target.value),
+                        }));
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label className="form-label mb-0" htmlFor="start-time">
+                  Start Time *
+                </Label>
+                <div className="relative">
+                  <Clock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="start-time"
+                    type="time"
+                    className="pl-9"
+                    value={formValues.startTime}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        startTime: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label className="form-label mb-0" htmlFor="end-time">
+                  End Time *
+                </Label>
+                <div className="relative">
+                  <Clock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="end-time"
+                    type="time"
+                    className="pl-9"
+                    value={formValues.endTime}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        endTime: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
-              {selectedSchedule ? "Save Changes" : "Create Schedule"}
+              {isSaving
+                ? "Saving..."
+                : selectedSchedule
+                  ? "Save Changes"
+                  : "Create Schedule"}
             </Button>
-          </div>
-        }
-      >
-        <div className="grid gap-4 py-2 w-fit">
-          <div className="grid gap-2">
-            <Label htmlFor="room-select">Room *</Label>
-            <Select
-              value={String(formValues.roomId)}
-              onValueChange={(value) =>
-                setFormValues((current) => ({
-                  ...current,
-                  roomId: parseInt(value),
-                }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a room" />
-              </SelectTrigger>
-              <SelectContent>
-                {rooms.map((room) => (
-                  <SelectItem key={room.roomId} value={String(room.roomId)}>
-                    Room {String(room.roomNumber ?? "")}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-          <div className="grid gap-2">
-            <Label htmlFor="doctor-select">Doctor *</Label>
-            <Select
-              value={String(formValues.doctorId)}
-              onValueChange={(value) =>
-                setFormValues((current) => ({
-                  ...current,
-                  doctorId: parseInt(value),
-                }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a doctor" />
-              </SelectTrigger>
-              <SelectContent>
-                {doctors.map((doctor) => (
-                  <SelectItem key={doctor.userId} value={String(doctor.userId)}>
-                    {getDoctorDisplayName(doctor)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-2">
-            <Label>Date *</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                >
-                  <Calendar className="h-4 w-4" />
-                  {formatDateForDisplay(formValues.selectedDate) ||
-                    "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <div className="p-3">
-                  <Input
-                    type="date"
-                    value={formValues.selectedDate}
-                    onChange={(e) => {
-                      setFormValues((current) => ({
-                        ...current,
-                        selectedDate: e.target.value,
-                        dayOfWeek: getDayOfWeek(e.target.value),
-                      }));
-                    }}
-                    className="w-full"
-                  />
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="gap-5 border-border/60 bg-card p-0 shadow-xl sm:max-w-[460px]">
+          <DialogHeader>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                  <Trash2 className="size-5" />
                 </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="start-time">Start Time *</Label>
-              <Input
-                id="start-time"
-                type="time"
-                value={formValues.startTime}
-                onChange={(event) =>
-                  setFormValues((current) => ({
-                    ...current,
-                    startTime: event.target.value,
-                  }))
-                }
-              />
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Delete Schedule
+                  </DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to remove this room schedule?
+                  </DialogDescription>
+                </div>
+              </div>
             </div>
+          </DialogHeader>
 
-            <div className="grid gap-2">
-              <Label htmlFor="end-time">End Time *</Label>
-              <Input
-                id="end-time"
-                type="time"
-                value={formValues.endTime}
-                onChange={(event) =>
-                  setFormValues((current) => ({
-                    ...current,
-                    endTime: event.target.value,
-                  }))
-                }
-              />
+          <div className="px-6">
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-4 text-sm">
+              <p className="font-medium">
+                Room {selectedSchedule?.roomNumber} -{" "}
+                {selectedSchedule?.doctorName}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {selectedSchedule?.dayOfWeek} | {selectedSchedule?.startTime} -{" "}
+                {selectedSchedule?.endTime}
+              </p>
             </div>
           </div>
-        </div>
-      </StyledDialog>
 
-      <StyledDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        title="Delete Schedule"
-        size="md"
-        footer={
-          <div className="space-x-2">
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button variant="outline" onClick={() => setDeleteOpen(false)}>
               Cancel
             </Button>
@@ -550,25 +647,11 @@ export default function AdminRoomSchedulePage() {
               onClick={handleDelete}
               disabled={isDeleting}
             >
-              Delete Schedule
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
-          </div>
-        }
-      >
-        <div className="py-4 text-sm text-muted-foreground">
-          Are you sure you want to remove this room schedule?
-          <div className="mt-3 rounded-lg border border-border bg-muted p-4 text-sm">
-            <p className="font-medium">
-              Room {selectedSchedule?.roomNumber} -{" "}
-              {selectedSchedule?.doctorName}
-            </p>
-            <p className="text-muted-foreground text-xs">
-              {selectedSchedule?.dayOfWeek} | {selectedSchedule?.startTime} -{" "}
-              {selectedSchedule?.endTime}
-            </p>
-          </div>
-        </div>
-      </StyledDialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -11,13 +11,20 @@ import {
 import { apiRequest } from "@/lib/api-client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { SearchBar } from "@/components/ui/search-bar";
 import { PageHeader } from "@/components/ui/page-header";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCcw, Plus } from "lucide-react";
+import {
+  AlertTriangle,
+  RefreshCcw,
+  Plus,
+  ShieldCheck,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -29,6 +36,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { getRoleBadgeClass } from "@/lib/theme";
 
 const SYSTEM_ADMIN_ID = 1;
 
@@ -103,6 +111,10 @@ export default function ManageUsersPage() {
   const [viewUserId, setViewUserId] = useState<number | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [pendingDeactivateUser, setPendingDeactivateUser] =
+    useState<User | null>(null);
+  const [deactivating, setDeactivating] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -174,6 +186,36 @@ export default function ManageUsersPage() {
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
+  }
+
+  function handleToggleActiveRequest(userId: number, active: boolean) {
+    if (active) {
+      toggleActive(userId, true);
+      return;
+    }
+
+    const user = users.find((item) => item.userId === userId);
+    if (!user) {
+      toast.error("User not found");
+      return;
+    }
+
+    setPendingDeactivateUser(user);
+    setDeactivateDialogOpen(true);
+  }
+
+  function closeDeactivateDialog() {
+    setDeactivateDialogOpen(false);
+    setPendingDeactivateUser(null);
+  }
+
+  async function confirmDeactivateUser() {
+    if (!pendingDeactivateUser) return;
+
+    setDeactivating(true);
+    await toggleActive(pendingDeactivateUser.userId, false);
+    setDeactivating(false);
+    closeDeactivateDialog();
   }
 
   function openRoleDialog(user: User) {
@@ -271,7 +313,7 @@ export default function ManageUsersPage() {
             <UserTable
               users={filteredUsers}
               searchQuery={deferredSearchQuery}
-              onToggleActive={toggleActive}
+              onToggleActive={handleToggleActiveRequest}
               onEditRole={openRoleDialog}
               onViewUserDetails={handleViewUserDetails}
             />
@@ -297,55 +339,75 @@ export default function ManageUsersPage() {
 
       {/* Change Role Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[430px]">
+        <DialogContent className="gap-5 border-border/60 bg-card p-0 shadow-xl sm:max-w-[460px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-medium">
-              Change User Role
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <ShieldCheck className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Change User Role
+                  </DialogTitle>
+                  <DialogDescription>
+                    Update access permissions for the selected account.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          {selectedUser && (
-            <div className="mt-2 rounded-lg border border-border bg-muted/40 p-4">
-              <p className="text-sm text-muted-foreground">Selected user</p>
-              <p className="text-sm mt-1">
-                <span className="text-muted-foreground">User ID:</span> #
-                {selectedUser.userId}
-              </p>
-              <p className="text-sm">
-                <span className="text-muted-foreground">Name:</span>{" "}
-                {selectedUser.firstName} {selectedUser.lastName}
-              </p>
-              <p className="text-sm">
-                <span className="text-muted-foreground">Current role:</span>{" "}
-                <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                  {selectedUser.roleName}
-                </span>
-              </p>
-            </div>
-          )}
+          <div className="space-y-5 px-6">
+            {selectedUser && (
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm font-medium leading-none">
+                      {selectedUser.firstName} {selectedUser.lastName}
+                    </p>
 
-          <div className="mt-4">
-            <label className="form-label">New Role</label>
-            <Select
-              value={newRole?.toString() || ""}
-              onValueChange={(value) => setNewRole(Number(value))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select new role" />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_OPTIONS.filter(
-                  (role) => role.label !== selectedUser?.roleName,
-                ).map((role) => (
-                  <SelectItem key={role.value} value={role.value.toString()}>
-                    {role.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      User ID {selectedUser.userId}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">
+                      Current role
+                    </span>
+
+                    <span className={getRoleBadgeClass()}>
+                      {selectedUser.roleName}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <Field>
+              <FieldLabel>New Role</FieldLabel>
+              <Select
+                value={newRole?.toString() || ""}
+                onValueChange={(value) => setNewRole(Number(value))}
+              >
+                <SelectTrigger className="h-10 w-full bg-background">
+                  <SelectValue placeholder="Select new role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLE_OPTIONS.filter(
+                    (role) => role.label !== selectedUser?.roleName,
+                  ).map((role) => (
+                    <SelectItem key={role.value} value={role.value.toString()}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
           </div>
 
-          <DialogFooter className="mt-5 gap-2">
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button
               variant="outline"
               onClick={() => {
@@ -370,6 +432,66 @@ export default function ManageUsersPage() {
         onSuccess={fetchUsers}
         currentUser={currentUser}
       />
+
+      {/* Deactivate User Confirmation Dialog */}
+      <Dialog
+        open={deactivateDialogOpen}
+        onOpenChange={(dialogOpen) => {
+          if (!dialogOpen) closeDeactivateDialog();
+        }}
+      >
+        <DialogContent className="gap-5 border-border/60 bg-card p-0 shadow-xl sm:max-w-[460px]">
+          <DialogHeader>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                  <AlertTriangle className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Deactivate User
+                  </DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to deactivate this account?
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {pendingDeactivateUser && (
+            <div className="px-6">
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+                <p className="text-sm font-medium">
+                  {pendingDeactivateUser.firstName}{" "}
+                  {pendingDeactivateUser.lastName}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  User ID #{pendingDeactivateUser.userId} ·{" "}
+                  {pendingDeactivateUser.email}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
+            <Button
+              variant="outline"
+              onClick={closeDeactivateDialog}
+              disabled={deactivating}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeactivateUser}
+              disabled={deactivating}
+            >
+              {deactivating ? "Deactivating..." : "Deactivate"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

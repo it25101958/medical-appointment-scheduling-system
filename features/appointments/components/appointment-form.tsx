@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { CalendarClock, Loader2, Send, Stethoscope } from "lucide-react";
+import {
+  CalendarClock,
+  CalendarDays,
+  Loader2,
+  Send,
+  Stethoscope,
+  UserRound,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -22,7 +29,7 @@ import { appointmentCreateSchema } from "../schemas/appointment.schema";
 import type { AppointmentType } from "../types/appointment.types";
 import {
   doctorApi,
-  getDoctorOptionLabel,
+  getDoctorDisplayName,
   type DoctorResponse,
 } from "@/features/doctors/api/doctor.api";
 
@@ -122,11 +129,12 @@ function AvailableSlotsSection({
   }, [doctorId, appointmentDate]);
 
   return (
-    <div className="grid gap-2">
-      <Label>Available Time Slots *</Label>
+    <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
+      <Label className="form-label mb-0">Available Time slots *</Label>
+      <div className="mb-3 flex items-center gap-2"></div>
 
       {isLoadingSlots ? (
-        <div className="flex h-10 items-center rounded-md border px-3 text-sm text-muted-foreground">
+        <div className="flex h-10 items-center rounded-md border border-border/60 bg-background px-3 text-sm text-muted-foreground">
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Loading available slots...
         </div>
@@ -145,7 +153,7 @@ function AvailableSlotsSection({
           ))}
         </div>
       ) : (
-        <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+        <div className="rounded-md border border-border/60 bg-background px-3 py-2 text-sm text-muted-foreground">
           {doctorId > 0 && appointmentDate
             ? "No available slots for this date."
             : "Select doctor and date to view available slots."}
@@ -265,211 +273,231 @@ export function AppointmentForm({
         {(field) => <input type="hidden" value={field.state.value} readOnly />}
       </form.Field>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label>Specialization *</Label>
+      <div className="space-y-5 px-6">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-2">
+            <Label className="form-label mb-0">Specialization *</Label>
 
-          <Select
-            value={selectedSpecialization}
-            onValueChange={(value) => {
-              setSelectedSpecialization(value);
-              form.setFieldValue("doctorId", 0);
-              form.setFieldValue("appointmentTime", "");
-            }}
-            disabled={isLoadingDoctors}
-          >
-            <SelectTrigger className="w-full">
-              <Stethoscope className="h-4 w-4 text-muted-foreground" />
-              <SelectValue
-                placeholder={
-                  isLoadingDoctors
-                    ? "Loading specializations..."
-                    : "Select specialization"
-                }
-              />
-            </SelectTrigger>
-
-            <SelectContent
-              position="popper"
-              align="start"
-              className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+            <Select
+              value={selectedSpecialization}
+              onValueChange={(value) => {
+                setSelectedSpecialization(value);
+                form.setFieldValue("doctorId", 0);
+                form.setFieldValue("appointmentTime", "");
+              }}
+              disabled={isLoadingDoctors}
             >
-              {specializations.map((specialization) => (
-                <SelectItem key={specialization} value={specialization}>
-                  {specialization.replaceAll("_", " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              <SelectTrigger className="h-10 w-full bg-background">
+                <Stethoscope className="h-4 w-4 text-muted-foreground" />
+                <SelectValue
+                  placeholder={
+                    isLoadingDoctors
+                      ? "Loading specializations..."
+                      : "Select specialization"
+                  }
+                />
+              </SelectTrigger>
+
+              <SelectContent
+                position="popper"
+                align="start"
+                className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+              >
+                {specializations.map((specialization) => (
+                  <SelectItem key={specialization} value={specialization}>
+                    {specialization.replaceAll("_", " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <form.Field
+            name="doctorId"
+            validators={{ onChange: appointmentCreateSchema.shape.doctorId }}
+          >
+            {(field) => (
+              <div className="grid gap-2">
+                <Label className="form-label mb-0">Doctor *</Label>
+
+                <Select
+                  value={field.state.value ? String(field.state.value) : ""}
+                  onValueChange={(value) => {
+                    field.handleChange(Number(value));
+                    form.setFieldValue("appointmentTime", "");
+                  }}
+                  disabled={
+                    !selectedSpecialization || filteredDoctors.length === 0
+                  }
+                >
+                  <SelectTrigger className="h-10 w-full bg-background">
+                    <UserRound className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue
+                      placeholder={
+                        selectedSpecialization
+                          ? "Select doctor"
+                          : "Select specialization first"
+                      }
+                    />
+                  </SelectTrigger>
+
+                  <SelectContent
+                    position="popper"
+                    align="start"
+                    className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+                  >
+                    {filteredDoctors.map((doctor) => (
+                      <SelectItem
+                        key={doctor.doctorId}
+                        value={String(doctor.doctorId)}
+                      >
+                        {getDoctorDisplayName(doctor)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {field.state.meta.errors.length > 0 && (
+                  <p className="form-error">
+                    {formatValidationErrors(field.state.meta.errors)}
+                  </p>
+                )}
+              </div>
+            )}
+          </form.Field>
         </div>
 
-        <form.Field
-          name="doctorId"
-          validators={{ onChange: appointmentCreateSchema.shape.doctorId }}
-        >
-          {(field) => (
-            <div className="grid gap-2">
-              <Label>Doctor *</Label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <form.Field
+            name="appointmentDate"
+            validators={{
+              onChange: appointmentCreateSchema.shape.appointmentDate,
+            }}
+          >
+            {(field) => (
+              <div className="grid gap-2">
+                <Label className="form-label mb-0" htmlFor={field.name}>
+                  Date *
+                </Label>
 
-              <Select
-                value={field.state.value ? String(field.state.value) : ""}
-                onValueChange={(value) => {
-                  field.handleChange(Number(value));
-                  form.setFieldValue("appointmentTime", "");
-                }}
-                disabled={
-                  !selectedSpecialization || filteredDoctors.length === 0
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue
-                    placeholder={
-                      selectedSpecialization
-                        ? "Select doctor"
-                        : "Select specialization first"
-                    }
+                <div className="relative">
+                  <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id={field.name}
+                    type="date"
+                    className="h-10 bg-background pl-8"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => {
+                      field.handleChange(event.target.value);
+                      form.setFieldValue("appointmentTime", "");
+                    }}
                   />
-                </SelectTrigger>
+                </div>
 
-                <SelectContent>
-                  {filteredDoctors.map((doctor) => (
-                    <SelectItem
-                      key={doctor.doctorId}
-                      value={String(doctor.doctorId)}
-                    >
-                      {getDoctorOptionLabel(doctor)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {field.state.meta.errors.length > 0 && (
+                  <p className="form-error">
+                    {formatValidationErrors(field.state.meta.errors)}
+                  </p>
+                )}
+              </div>
+            )}
+          </form.Field>
 
-              {field.state.meta.errors.length > 0 && (
-                <p className="form-error">
-                  {formatValidationErrors(field.state.meta.errors)}
-                </p>
-              )}
-            </div>
+          <form.Field
+            name="appointmentType"
+            validators={{
+              onChange: appointmentCreateSchema.shape.appointmentType,
+            }}
+          >
+            {(field) => (
+              <div className="grid gap-2">
+                <Label className="form-label mb-0">Appointment Type *</Label>
+
+                <Select
+                  value={field.state.value}
+                  onValueChange={field.handleChange}
+                >
+                  <SelectTrigger className="h-10 w-full bg-background">
+                    <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Select appointment type" />
+                  </SelectTrigger>
+
+                  <SelectContent
+                    position="popper"
+                    align="start"
+                    className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+                  >
+                    {appointmentTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {field.state.meta.errors.length > 0 && (
+                  <p className="form-error">
+                    {formatValidationErrors(field.state.meta.errors)}
+                  </p>
+                )}
+              </div>
+            )}
+          </form.Field>
+        </div>
+
+        <form.Subscribe
+          selector={(state) => [
+            state.values.doctorId,
+            state.values.appointmentDate,
+            state.values.appointmentTime,
+          ]}
+        >
+          {([doctorId, appointmentDate, appointmentTime]) => (
+            <AvailableSlotsSection
+              doctorId={Number(doctorId)}
+              appointmentDate={String(appointmentDate)}
+              appointmentTime={String(appointmentTime)}
+              onAppointmentTimeChange={(value) =>
+                form.setFieldValue("appointmentTime", value)
+              }
+            />
           )}
-        </form.Field>
-      </div>
+        </form.Subscribe>
 
-      <div className="grid gap-4 sm:grid-cols-2">
         <form.Field
-          name="appointmentDate"
-          validators={{
-            onChange: appointmentCreateSchema.shape.appointmentDate,
-          }}
+          name="notes"
+          validators={{ onChange: appointmentCreateSchema.shape.notes }}
         >
           {(field) => (
             <div className="grid gap-2">
-              <Label htmlFor={field.name}>Date *</Label>
+              <Label className="form-label mb-0" htmlFor={field.name}>
+                Notes
+              </Label>
 
-              <Input
+              <Textarea
                 id={field.name}
-                type="date"
-                value={field.state.value}
+                maxLength={255}
+                rows={4}
+                className="bg-background"
+                value={field.state.value || ""}
                 onBlur={field.handleBlur}
-                onChange={(event) => {
-                  field.handleChange(event.target.value);
-                  form.setFieldValue("appointmentTime", "");
-                }}
+                onChange={(event) => field.handleChange(event.target.value)}
+                placeholder="Add symptoms or anything the doctor should know"
               />
 
-              {field.state.meta.errors.length > 0 && (
-                <p className="form-error">
-                  {formatValidationErrors(field.state.meta.errors)}
-                </p>
-              )}
-            </div>
-          )}
-        </form.Field>
-
-        <form.Field
-          name="appointmentType"
-          validators={{
-            onChange: appointmentCreateSchema.shape.appointmentType,
-          }}
-        >
-          {(field) => (
-            <div className="grid gap-2">
-              <Label>Appointment Type *</Label>
-
-              <Select
-                value={field.state.value}
-                onValueChange={field.handleChange}
-              >
-                <SelectTrigger className="w-full">
-                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Select appointment type" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {appointmentTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {field.state.meta.errors.length > 0 && (
-                <p className="form-error">
-                  {formatValidationErrors(field.state.meta.errors)}
-                </p>
-              )}
+              <div className="flex justify-between gap-3 text-xs text-muted-foreground">
+                <span>
+                  {field.state.meta.errors.length > 0
+                    ? formatValidationErrors(field.state.meta.errors)
+                    : "Optional, up to 255 characters"}
+                </span>
+                <span>{field.state.value?.length || 0}/255</span>
+              </div>
             </div>
           )}
         </form.Field>
       </div>
-
-      <form.Subscribe
-        selector={(state) => [
-          state.values.doctorId,
-          state.values.appointmentDate,
-          state.values.appointmentTime,
-        ]}
-      >
-        {([doctorId, appointmentDate, appointmentTime]) => (
-          <AvailableSlotsSection
-            doctorId={Number(doctorId)}
-            appointmentDate={String(appointmentDate)}
-            appointmentTime={String(appointmentTime)}
-            onAppointmentTimeChange={(value) =>
-              form.setFieldValue("appointmentTime", value)
-            }
-          />
-        )}
-      </form.Subscribe>
-
-      <form.Field
-        name="notes"
-        validators={{ onChange: appointmentCreateSchema.shape.notes }}
-      >
-        {(field) => (
-          <div className="grid gap-2">
-            <Label htmlFor={field.name}>Notes</Label>
-
-            <Textarea
-              id={field.name}
-              maxLength={255}
-              rows={4}
-              value={field.state.value || ""}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="Add symptoms or anything the doctor should know"
-            />
-
-            <div className="flex justify-between gap-3 text-xs text-muted-foreground">
-              <span>
-                {field.state.meta.errors.length > 0
-                  ? formatValidationErrors(field.state.meta.errors)
-                  : "Optional, up to 255 characters"}
-              </span>
-              <span>{field.state.value?.length || 0}/255</span>
-            </div>
-          </div>
-        )}
-      </form.Field>
 
       <form.Subscribe
         selector={(state) => [
@@ -496,7 +524,7 @@ export function AppointmentForm({
             String(appointmentType).trim().length > 0;
 
           return (
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-2 border-t border-border/60 bg-muted/20 px-6 py-4 sm:flex-row sm:justify-end">
               {onCancel && (
                 <Button
                   type="button"
@@ -517,9 +545,15 @@ export function AppointmentForm({
                 }
               >
                 {isSubmitting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Scheduling...
+                  </>
                 ) : (
-                  <p>Schedule Appointment</p>
+                  <>
+                    <Send className="h-4 w-4" />
+                    Schedule Appointment
+                  </>
                 )}
               </Button>
             </div>

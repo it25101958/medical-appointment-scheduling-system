@@ -4,7 +4,6 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { SearchBar } from "@/components/ui/search-bar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { highlightText } from "@/lib/highlight-search";
@@ -12,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -23,7 +23,15 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Plus, RefreshCcw, Edit3, Trash2 } from "lucide-react";
+import {
+  Boxes,
+  DoorOpen,
+  Edit3,
+  Hash,
+  Plus,
+  RefreshCcw,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Room,
@@ -280,20 +288,24 @@ export default function AdminRoomsPage() {
                       {(room.status as string) || "AVAILABLE"}
                     </td>
                     <td className="px-4 py-4 text-center">
-                      <div className="flex flex-wrap justify-center gap-2">
+                      <div className="flex items-center justify-center gap-2">
                         <Button
-                          size="sm"
+                          size="icon-sm"
                           variant="outline"
                           onClick={() => openEditDialog(room)}
+                          aria-label="Edit room"
+                          title="Edit"
                         >
-                          <Edit3 className="h-4 w-4" /> Edit
+                          <Edit3 className="h-4 w-4" />
                         </Button>
                         <Button
-                          size="sm"
+                          size="icon-sm"
                           variant="destructive"
                           onClick={() => openDeleteDialog(room)}
+                          aria-label="Delete room"
+                          title="Delete"
                         >
-                          <Trash2 className="h-4 w-4" /> Delete
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </td>
@@ -306,18 +318,43 @@ export default function AdminRoomsPage() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border/60 bg-card p-0 shadow-xl sm:max-w-[640px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
-              {selectedRoom ? "Edit Room" : "Create Room"}
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <DoorOpen className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    {selectedRoom ? "Edit Room" : "Create Room"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Manage room details, equipment, capacity, and status.
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="grid gap-4 py-2">
+          <div className="space-y-5 px-6">
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+              <p className="text-sm font-medium leading-none">Room Details</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Keep rooms clearly identified for schedules and appointments.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="room-number">Room Number</Label>
+              <Label className="form-label mb-0" htmlFor="room-number">
+                Room Number
+              </Label>
+              <div className="relative">
+                <Hash className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="room-number"
+                className="pl-9"
                 value={formValues.roomNumber}
                 onChange={(event) =>
                   setFormValues((current) => ({
@@ -327,12 +364,18 @@ export default function AdminRoomsPage() {
                 }
                 placeholder="e.g., 101, 202, A-03"
               />
+              </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="room-type">Room Type</Label>
+              <Label className="form-label mb-0" htmlFor="room-type">
+                Room Type
+              </Label>
+              <div className="relative">
+                <DoorOpen className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="room-type"
+                className="pl-9"
                 value={formValues.roomType}
                 onChange={(event) =>
                   setFormValues((current) => ({
@@ -342,13 +385,19 @@ export default function AdminRoomsPage() {
                 }
                 placeholder="e.g., Consulting, Lab, Ward"
               />
+              </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="room-capacity">Capacity</Label>
+              <Label className="form-label mb-0" htmlFor="room-capacity">
+                Capacity
+              </Label>
+              <div className="relative">
+                <Boxes className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="room-capacity"
                 type="number"
+                className="pl-9"
                 value={formValues.capacity}
                 onChange={(event) =>
                   setFormValues((current) => ({
@@ -358,12 +407,18 @@ export default function AdminRoomsPage() {
                 }
                 placeholder="Enter capacity (e.g., 2, 4, 6)"
               />
+              </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="equipment-available">Equipment Available</Label>
+              <Label className="form-label mb-0" htmlFor="equipment-available">
+                Equipment Available
+              </Label>
+              <div className="relative">
+                <Boxes className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="equipment-available"
+                className="pl-9"
                 value={formValues.equipmentAvailable}
                 onChange={(event) =>
                   setFormValues((current) => ({
@@ -373,10 +428,13 @@ export default function AdminRoomsPage() {
                 }
                 placeholder="e.g., ECG Machine, Monitor"
               />
+              </div>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="room-status">Status</Label>
+            <div className="grid gap-2 sm:col-span-2">
+              <Label className="form-label mb-0" htmlFor="room-status">
+                Status
+              </Label>
               <Select
                 value={formValues.status}
                 onValueChange={(value) =>
@@ -386,19 +444,24 @@ export default function AdminRoomsPage() {
                   }))
                 }
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+                <SelectContent
+                  position="popper"
+                  align="start"
+                  className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+                >
                   <SelectItem value="AVAILABLE">Available</SelectItem>
                   <SelectItem value="OCCUPIED">Occupied</SelectItem>
                   <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            </div>
           </div>
 
-          <DialogFooter className="space-x-2">
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
@@ -410,25 +473,36 @@ export default function AdminRoomsPage() {
       </Dialog>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="gap-5 border-border/60 bg-card p-0 shadow-xl sm:max-w-[460px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
-              Delete Room
-            </DialogTitle>
+            <div className="border-b border-border/60 px-6 pb-5 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                  <Trash2 className="size-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold tracking-tight">
+                    Delete Room
+                  </DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to remove this room?
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="py-4 text-sm text-muted-foreground">
-            Are you sure you want to remove this room?
-            <div className="mt-3 rounded-lg border border-border bg-muted p-4 text-sm">
+          <div className="px-6">
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-4 text-sm">
               <p className="font-medium">
                 {selectedRoom?.roomType || "Room"} (ID: {selectedRoom?.roomId})
               </p>
-              <p className="text-muted-foreground text-xs">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Capacity: {selectedRoom?.capacity} | Status:{" "}
                 {selectedRoom?.status}
               </p>
             </div>
           </div>
-          <DialogFooter className="space-x-2">
+          <DialogFooter className="border-t border-border/60 bg-muted/20 px-6 py-4">
             <Button variant="outline" onClick={() => setDeleteOpen(false)}>
               Cancel
             </Button>
@@ -437,7 +511,7 @@ export default function AdminRoomsPage() {
               onClick={handleDelete}
               disabled={isDeleting}
             >
-              Delete room
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
